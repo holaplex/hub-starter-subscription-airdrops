@@ -1,0 +1,9 @@
+query GetMe {
+  me {
+    email
+    image
+    wallet {
+      address
+    }
+  }
+}

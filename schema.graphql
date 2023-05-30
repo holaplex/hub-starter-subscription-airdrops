@@ -1,0 +1,24 @@
+#import Wallet from 'holaplex.graphql'
+#import CollectionMint from 'holaplex.graphql'
+#import Drop from 'holaplex.graphql'
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type User {
+  name: String
+  email: String
+  image: String
+  wallet: Wallet
+}
+
+type Query {
+  drop: Drop
+  me: User
+}
+
+type Mutation {
+  mint: CollectionMint
+}
