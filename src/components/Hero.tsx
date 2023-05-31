@@ -1,49 +1,10 @@
 'use client';
 import Image from 'next/image';
-import { cloneElement, useMemo } from 'react';
-import { Holder } from '@/graphql.types';
-import { shorten } from '../modules/wallet';
-import { MintDrop } from '@/mutations/mint.graphql';
-import { useApolloClient, useMutation, useQuery } from '@apollo/client';
-import { GetDrop } from '@/queries/drop.graphql';
-import BounceLoader from 'react-spinners/BounceLoader';
 import Link from 'next/link';
-import clsx from 'clsx';
-import { drop, isNil, not, pipe } from 'ramda';
 import useMe from '@/hooks/useMe';
-import { Session } from 'next-auth';
-import { CheckIcon } from '@heroicons/react/24/solid';
-import Tabs from '../layouts/Tabs';
-import { usePathname } from 'next/navigation';
-
-interface MintData {
-  mint: string;
-}
 
 export default function Hero() {
   const me = useMe();
-  const dropQuery = useQuery(GetDrop);
-  const pathname = usePathname();
-  const collection = dropQuery.data?.drop.collection;
-  const metadataJson = collection?.metadataJson;
-  const holder = useMemo(() => {
-    return collection?.holders?.find(
-      (holder: Holder) => holder.address === me?.wallet?.address
-    );
-  }, [collection?.holders, me?.wallet]);
-  const owns = pipe(isNil, not)(holder);
-  const [mint, { loading }] = useMutation<MintData>(MintDrop, {
-    awaitRefetchQueries: true,
-    refetchQueries: [
-      {
-        query: GetDrop
-      }
-    ]
-  });
-
-  const onMint = () => {
-    mint();
-  };
 
   return (
     <>
