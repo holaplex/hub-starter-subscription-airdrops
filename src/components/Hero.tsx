@@ -20,12 +20,7 @@ interface MintData {
   mint: string;
 }
 
-interface HomeProps {
-  session?: Session | null;
-  children: React.ReactNode;
-}
-
-export default function Home({ session, children }: HomeProps) {
+export default function Hero() {
   const me = useMe();
   const dropQuery = useQuery(GetDrop);
   const pathname = usePathname();
@@ -87,6 +82,7 @@ export default function Home({ session, children }: HomeProps) {
               Sign up to receive new collectibles each week!
             </span>
           )}
+
           <Link
             href='/'
             className='text-cta font-bold md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6 mt-10'
@@ -94,21 +90,6 @@ export default function Home({ session, children }: HomeProps) {
             Subscribe for free
           </Link>
         </div>
-        {me && (
-          <Tabs.Page className='mt-8'>
-            <Tabs.Panel loading={loading}>
-              <Tabs.Tab name='Past drips' href='/' active={pathname === '/'} />
-              <Tabs.Tab
-                name='Your collectibles'
-                href='/collectibles'
-                active={pathname === '/collectibles'}
-              />
-            </Tabs.Panel>
-            <Tabs.Content>
-              {cloneElement(children as JSX.Element, { loading })}
-            </Tabs.Content>
-          </Tabs.Page>
-        )}
       </div>
     </>
   );
