@@ -11,13 +11,12 @@ export default async function Layout({
 }) {
   const pathname = usePathname();
 
-  const loading = false;
   return (
     <>
       <Hero />
 
       <Tabs.Page className='mt-8'>
-        <Tabs.Panel loading={loading}>
+        <Tabs.Panel>
           <Tabs.Tab
             name='Past drips'
             href='/drips'
@@ -29,9 +28,7 @@ export default async function Layout({
             active={pathname === '/collectibles'}
           />
         </Tabs.Panel>
-        <Tabs.Content>
-          {cloneElement(children as JSX.Element, { loading })}
-        </Tabs.Content>
+        <Tabs.Content>{cloneElement(children as JSX.Element)}</Tabs.Content>
       </Tabs.Page>
     </>
   );

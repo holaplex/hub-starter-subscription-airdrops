@@ -16,6 +16,7 @@ type User {
 
 type Query {
   drop: Drop
+  drops: [Drop]
   me: User
 }
 

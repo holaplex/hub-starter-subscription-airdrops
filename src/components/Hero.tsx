@@ -38,11 +38,10 @@ export default function Hero() {
       <div className='w-full flex flex-col items-center'>
         <div className='flex flex-col items-center mt-20'>
           <span className='font-semibold text-5xl'>Holaplex drip</span>
-          {!me && (
-            <span className='font-medium mt-3 text-gray-500'>
-              Sign up to receive new collectibles each week!
-            </span>
-          )}
+
+          <span className='font-medium mt-3 text-gray-500'>
+            Sign up to receive new collectibles each week!
+          </span>
 
           <Link
             href='/'

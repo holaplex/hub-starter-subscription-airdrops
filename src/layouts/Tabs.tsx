@@ -13,7 +13,7 @@ interface TabsPageProps {
 
 function TabsPage({ children, className }: TabsPageProps) {
   return (
-    <section className={clsx('flex flex-col gap-8 items-center', className)}>
+    <section className={clsx('flex flex-col items-center', className)}>
       {Children.map(children, (child) => cloneElement(child))}
     </section>
   );
@@ -28,7 +28,7 @@ interface TabsPanel {
 function TabsPanel({ children, loading }: TabsPanel) {
   return (
     <>
-      <nav className={clsx('w-full flex flex-row gap-6')}>
+      <nav className={clsx('w-full flex flex-row gap-6 justify-center')}>
         {Children.map(children, (child) => cloneElement(child, { loading }))}
       </nav>
     </>
