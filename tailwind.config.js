@@ -9,6 +9,9 @@ module.exports = {
         contrast: ' #212122',
 
         gray: {
+          // cell subtle
+          200: '#2B2B2B',
+          300: '#8B8B8E',
           //subtle text
           400: '#AAAAAA',
           500: '#BDBDBD'

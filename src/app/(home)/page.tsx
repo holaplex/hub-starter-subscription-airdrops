@@ -1,13 +1,13 @@
 'use client';
 import { GetDrops } from '@/queries/drop.graphql';
 import { useQuery } from '@apollo/client';
-import { Drop } from '../../../graphql.types';
+import { Drop } from '../../graphql.types';
 
 interface GetDropsData {
   drops: [Drop];
 }
 
-export default function Drips() {
+export default function DripsPage() {
   const dropsQuery = useQuery<GetDropsData>(GetDrops);
 
   return (
