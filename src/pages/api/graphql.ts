@@ -1,7 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
-import { join } from 'node:path';
 import db from '@/modules/db';
 import {
   MintDropInput,
@@ -17,6 +16,7 @@ import { MintNft } from '@/mutations/drop.graphql';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { GetProjectDrop, GetProjectDrops } from '@/queries/project.graphql';
+import { GetCustomerCollectibles } from '@/queries/customer.graphql';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import UserSource from '@/modules/user';
 import holaplex from '@/modules/holaplex';
@@ -54,6 +54,15 @@ interface GetDropsVars {
   project: string;
 }
 
+interface GetCustomerCollectiblesData {
+  project: Pick<Project, 'customer'>;
+}
+
+interface GetCustomerCollectiblesVars {
+  project: string;
+  customer: string;
+}
+
 export const queryResolvers: QueryResolvers<AppContext> = {
   async drop(_a, _b, { dataSources: { holaplex } }) {
     const { data } = await holaplex.query<GetDropData, GetDropVars>({
@@ -77,6 +86,32 @@ export const queryResolvers: QueryResolvers<AppContext> = {
     });
 
     return data.project.drops as [Drop];
+  },
+  async collectibles(_a, _b, { session, dataSources: { holaplex, db } }) {
+    if (!session) {
+      return null;
+    }
+    const user = await db.user.findFirst({
+      where: { email: session.user?.email }
+    });
+
+    if (!user || !user.holaplexCustomerId) {
+      return null;
+    }
+
+    const { data } = await holaplex.query<
+      GetCustomerCollectiblesData,
+      GetCustomerCollectiblesVars
+    >({
+      fetchPolicy: 'network-only',
+      query: GetCustomerCollectibles,
+      variables: {
+        project: process.env.HOLAPLEX_PROJECT_ID as string,
+        customer: user?.holaplexCustomerId
+      }
+    });
+
+    return data.project.customer?.mints as [CollectionMint];
   },
   async me(_a, _b, { session, dataSources: { user } }) {
     if (!session) {

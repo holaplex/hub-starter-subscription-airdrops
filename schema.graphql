@@ -15,9 +15,10 @@ type User {
 }
 
 type Query {
+  me: User
   drop: Drop
   drops: [Drop]
-  me: User
+  collectibles: [CollectionMint]
 }
 
 type Mutation {

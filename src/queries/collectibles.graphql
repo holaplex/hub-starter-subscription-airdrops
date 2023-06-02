@@ -1,0 +1,13 @@
+query GetCollectibles {
+  collectibles {
+    id
+    collectionId
+    createdAt
+    metadataJson {
+      id
+      image
+      name
+      description
+    }
+  }
+}

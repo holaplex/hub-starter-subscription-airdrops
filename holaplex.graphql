@@ -1321,6 +1321,8 @@ type Purchase {
 }
 
 type Query {
+  collectibles: [CollectionMint]
+
   """
   Returns a list of `ActionCost` which represents the cost of each action on different blockchains.
   

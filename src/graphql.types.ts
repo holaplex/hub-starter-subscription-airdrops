@@ -1241,6 +1241,7 @@ export type Purchase = {
 
 export type Query = {
   __typename?: 'Query';
+  collectibles?: Maybe<Array<Maybe<CollectionMint>>>;
   /**
    * Returns a list of `ActionCost` which represents the cost of each action on different blockchains.
    *
@@ -2096,6 +2097,7 @@ export type PurchaseResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  collectibles?: Resolver<Maybe<Array<Maybe<ResolversTypes['CollectionMint']>>>, ParentType, ContextType>;
   creditSheet?: Resolver<Array<ResolversTypes['ActionCost']>, ParentType, ContextType>;
   drop?: Resolver<Maybe<ResolversTypes['Drop']>, ParentType, ContextType>;
   drops?: Resolver<Maybe<Array<Maybe<ResolversTypes['Drop']>>>, ParentType, ContextType>;

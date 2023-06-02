@@ -9,6 +9,8 @@ module.exports = {
         contrast: ' #212122',
 
         gray: {
+          // bg subtle
+          100: '#212122',
           // cell subtle
           200: '#2B2B2B',
           300: '#8B8B8E',
