@@ -1,0 +1,6 @@
+query GetSubscription {
+  subscription {
+    userId
+    subscribedAt
+  }
+}

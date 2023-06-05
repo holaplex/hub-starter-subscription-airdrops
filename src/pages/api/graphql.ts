@@ -9,7 +9,8 @@ import {
   QueryResolvers,
   Project,
   CollectionMint,
-  Drop
+  Drop,
+  Subscription
 } from '@/graphql.types';
 import { Session } from 'next-auth';
 import { MintNft } from '@/mutations/drop.graphql';
@@ -22,6 +23,7 @@ import UserSource from '@/modules/user';
 import holaplex from '@/modules/holaplex';
 import { loadSchema } from '@graphql-tools/load';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
+import { subscribe } from 'graphql';
 
 export interface AppContext {
   session: Session | null;
@@ -113,6 +115,27 @@ export const queryResolvers: QueryResolvers<AppContext> = {
 
     return data.project.customer?.mints as [CollectionMint];
   },
+  async subscription(_a, _b, { session, dataSources: { holaplex, db } }) {
+    if (!session) {
+      return null;
+    }
+    const user = await db.user.findFirst({
+      where: { email: session.user?.email }
+    });
+
+    if (!user || !user.holaplexCustomerId) {
+      return null;
+    }
+
+    const subscription = await db.subscription.findFirst({
+      where: { userId: user.id }
+    });
+
+    return {
+      userId: user.id,
+      subscribedAt: subscription?.subscribedAt
+    } as Subscription;
+  },
   async me(_a, _b, { session, dataSources: { user } }) {
     if (!session) {
       return null;
@@ -137,6 +160,49 @@ interface MintNftVars {
 }
 
 const mutationResolvers: MutationResolvers<AppContext> = {
+  async subscribe(_a, _b, { session, dataSources: { db, holaplex } }) {
+    if (!session) {
+      return null;
+    }
+
+    const user = await db.user.findFirst({
+      where: { email: session.user?.email }
+    });
+
+    const subscription = await db.subscription.create({
+      data: {
+        userId: user?.id as string,
+        subscribedAt: new Date()
+      }
+    });
+
+    return {
+      userId: user?.id,
+      subscribedAt: subscription.subscribedAt?.toISOString()
+    } as Subscription;
+  },
+  async unsubscribe(_a, _b, { session, dataSources: { db, holaplex } }) {
+    if (!session) {
+      return null;
+    }
+
+    const user = await db.user.findFirst({
+      where: { email: session.user?.email }
+    });
+
+    const subscription = await db.subscription.update({
+      where: {
+        userId: user?.id as string
+      },
+      data: {
+        subscribedAt: null
+      }
+    });
+    return {
+      userId: user?.id,
+      subscribedAt: subscription.subscribedAt?.toISOString()
+    } as Subscription;
+  },
   async mint(_a, _b, { session, dataSources: { db, holaplex } }) {
     if (!session) {
       return null;

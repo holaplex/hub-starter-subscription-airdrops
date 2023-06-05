@@ -32,6 +32,17 @@ declare module '*/mint.graphql' {
 }
     
 
+declare module '*/subscription.graphql' {
+  import { DocumentNode } from 'graphql';
+  const defaultDocument: DocumentNode;
+  export const Subscribe: DocumentNode;
+export const Unsubscribe: DocumentNode;
+export const GetSubscription: DocumentNode;
+
+  export default defaultDocument;
+}
+    
+
 declare module '*/collectibles.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;

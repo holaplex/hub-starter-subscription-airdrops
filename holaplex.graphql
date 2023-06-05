@@ -1013,6 +1013,7 @@ type Mutation {
   Fails if the drop or collection is not found, or if updating the drop record fails.
   """
   shutdownDrop(input: ShutdownDropInput!): ShutdownDropPayload!
+  subscribe: Subscription
 
   """
   Transfers an asset from one user to another on a supported blockchain network.
@@ -1035,6 +1036,7 @@ type Mutation {
   If there is an error while sending the TransferAsset event to the event producer.
   """
   transferAsset(input: TransferAssetInput!): TransferAssetPayload!
+  unsubscribe: Subscription
 }
 
 """
@@ -1359,6 +1361,7 @@ type Query {
   Query a project by it's ID, this query returns `null` if the project does not exist.
   """
   project(id: UUID!): Project
+  subscription: Subscription
 
   """Retrieve a user identity by providing their ID."""
   user(id: UUID!): User
@@ -1404,6 +1407,11 @@ input ShutdownDropInput {
 type ShutdownDropPayload {
   """Drop that has been shutdown"""
   drop: Drop!
+}
+
+type Subscription {
+  subscribedAt: String
+  userId: String
 }
 
 input TransferAssetInput {

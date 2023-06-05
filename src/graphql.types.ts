@@ -854,6 +854,7 @@ export type Mutation = {
    * Fails if the drop or collection is not found, or if updating the drop record fails.
    */
   shutdownDrop: ShutdownDropPayload;
+  subscribe?: Maybe<Subscription>;
   /**
    * Transfers an asset from one user to another on a supported blockchain network.
    *
@@ -875,6 +876,7 @@ export type Mutation = {
    * If there is an error while sending the TransferAsset event to the event producer.
    */
   transferAsset: TransferAssetPayload;
+  unsubscribe?: Maybe<Subscription>;
 };
 
 
@@ -1270,6 +1272,7 @@ export type Query = {
   organization?: Maybe<Organization>;
   /** Query a project by it's ID, this query returns `null` if the project does not exist. */
   project?: Maybe<Project>;
+  subscription?: Maybe<Subscription>;
   /** Retrieve a user identity by providing their ID. */
   user?: Maybe<User>;
 };
@@ -1335,6 +1338,12 @@ export type ShutdownDropPayload = {
   __typename?: 'ShutdownDropPayload';
   /** Drop that has been shutdown */
   drop: Drop;
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  subscribedAt?: Maybe<Scalars['String']>;
+  userId?: Maybe<Scalars['String']>;
 };
 
 export type TransferAssetInput = {
@@ -1605,6 +1614,7 @@ export type ResolversTypes = {
   ShutdownDropInput: ShutdownDropInput;
   ShutdownDropPayload: ResolverTypeWrapper<ShutdownDropPayload>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Subscription: ResolverTypeWrapper<{}>;
   TransferAssetInput: TransferAssetInput;
   TransferAssetPayload: ResolverTypeWrapper<TransferAssetPayload>;
   Treasury: ResolverTypeWrapper<Treasury>;
@@ -1698,6 +1708,7 @@ export type ResolversParentTypes = {
   ShutdownDropInput: ShutdownDropInput;
   ShutdownDropPayload: ShutdownDropPayload;
   String: Scalars['String'];
+  Subscription: {};
   TransferAssetInput: TransferAssetInput;
   TransferAssetPayload: TransferAssetPayload;
   Treasury: Treasury;
@@ -2022,7 +2033,9 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   retryDrop?: Resolver<ResolversTypes['CreateDropPayload'], ParentType, ContextType, RequireFields<MutationRetryDropArgs, 'input'>>;
   retryMint?: Resolver<ResolversTypes['RetryMintPayload'], ParentType, ContextType, RequireFields<MutationRetryMintArgs, 'input'>>;
   shutdownDrop?: Resolver<ResolversTypes['ShutdownDropPayload'], ParentType, ContextType, RequireFields<MutationShutdownDropArgs, 'input'>>;
+  subscribe?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType>;
   transferAsset?: Resolver<ResolversTypes['TransferAssetPayload'], ParentType, ContextType, RequireFields<MutationTransferAssetArgs, 'input'>>;
+  unsubscribe?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType>;
 };
 
 export interface NaiveDateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NaiveDateTime'], any> {
@@ -2106,6 +2119,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   organization?: Resolver<Maybe<ResolversTypes['Organization']>, ParentType, ContextType, RequireFields<QueryOrganizationArgs, 'id'>>;
   project?: Resolver<Maybe<ResolversTypes['Project']>, ParentType, ContextType, RequireFields<QueryProjectArgs, 'id'>>;
+  subscription?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
 };
 
@@ -2122,6 +2136,11 @@ export type RetryMintPayloadResolvers<ContextType = any, ParentType extends Reso
 export type ShutdownDropPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['ShutdownDropPayload'] = ResolversParentTypes['ShutdownDropPayload']> = {
   drop?: Resolver<ResolversTypes['Drop'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
+  subscribedAt?: SubscriptionResolver<Maybe<ResolversTypes['String']>, "subscribedAt", ParentType, ContextType>;
+  userId?: SubscriptionResolver<Maybe<ResolversTypes['String']>, "userId", ParentType, ContextType>;
 };
 
 export type TransferAssetPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['TransferAssetPayload'] = ResolversParentTypes['TransferAssetPayload']> = {
@@ -2235,6 +2254,7 @@ export type Resolvers<ContextType = any> = {
   ResumeDropPayload?: ResumeDropPayloadResolvers<ContextType>;
   RetryMintPayload?: RetryMintPayloadResolvers<ContextType>;
   ShutdownDropPayload?: ShutdownDropPayloadResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
   TransferAssetPayload?: TransferAssetPayloadResolvers<ContextType>;
   Treasury?: TreasuryResolvers<ContextType>;
   UUID?: GraphQLScalarType;

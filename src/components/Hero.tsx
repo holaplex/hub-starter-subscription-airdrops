@@ -7,10 +7,48 @@ import { signOut } from 'next-auth/react';
 import { shorten } from '../modules/wallet';
 import { Icon } from './Icon';
 import Copy from './Copy';
+import { Subscription } from '../graphql.types';
+import { useMutation, useQuery } from '@apollo/client';
+import { GetSubscription } from '@/queries/subscription.graphql';
+import { Subscribe, Unsubscribe } from '@/mutations/subscription.graphql';
+import { useRouter } from 'next/navigation';
+interface GetSubscriptionData {
+  subscription: Subscription;
+}
+
+interface SubscribeData {
+  subscription: Subscription;
+}
+
+interface UnsubscribeData {
+  subscription: Subscription;
+}
 
 export default function Hero() {
   const me = useMe();
-  console.log('me', me);
+  const router = useRouter();
+
+  const subscriptionQuery = useQuery<GetSubscriptionData>(GetSubscription);
+
+  const [subscribe] = useMutation<SubscribeData>(Subscribe, {
+    refetchQueries: [{ query: GetSubscription }]
+  });
+
+  const [unsubscribe] = useMutation<UnsubscribeData>(Unsubscribe, {
+    refetchQueries: [{ query: GetSubscription }]
+  });
+
+  const onSubscribe = () => {
+    if (!me) {
+      router.push('/login');
+    }
+    subscribe();
+  };
+
+  const onUnsubscribe = () => {
+    unsubscribe();
+  };
+
   return (
     <>
       <div className='flex w-full justify-between items-center py-4'>
@@ -69,17 +107,34 @@ export default function Hero() {
       <div className='w-full flex flex-col items-center'>
         <div className='flex flex-col items-center mt-20'>
           <span className='font-semibold text-5xl'>Holaplex drip</span>
-
-          <span className='font-medium mt-3 text-gray-500'>
-            Sign up to receive new collectibles each week!
-          </span>
-
-          <Link
-            href='/'
-            className='text-cta font-bold md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6 mt-10'
-          >
-            Subscribe for free
-          </Link>
+          {subscriptionQuery.loading ? (
+            <></>
+          ) : subscriptionQuery.data?.subscription?.subscribedAt ? (
+            <>
+              <span className='font-medium mt-3 text-gray-500'>
+                You&apos;re subscribed! You will now receive new collectibles
+                each week.
+              </span>
+              <button
+                onClick={onUnsubscribe}
+                className='text-cta font-bold md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6 mt-10'
+              >
+                Cancel subscription
+              </button>
+            </>
+          ) : (
+            <>
+              <span className='font-medium mt-3 text-gray-500'>
+                Sign up to receive new collectibles each week!
+              </span>
+              <button
+                onClick={onSubscribe}
+                className='text-cta font-bold md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6 mt-10'
+              >
+                Subscribe for free
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>
