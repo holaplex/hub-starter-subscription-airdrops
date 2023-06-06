@@ -68,3 +68,10 @@ model Subscription {
   subscribedAt DateTime?
   user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+
+model Airdrop {
+  dropId  String @unique
+  startedAt DateTime?
+  completedAt DateTime?
+}
