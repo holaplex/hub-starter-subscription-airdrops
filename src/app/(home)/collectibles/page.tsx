@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { CollectionMint } from '../../../graphql.types';
 
 interface GetCollectiblesData {
-  mints: [CollectionMint];
+  collectibles: [CollectionMint];
 }
 
 export default function CollectiblesPage() {
@@ -23,20 +23,22 @@ export default function CollectiblesPage() {
           </>
         ) : (
           <>
-            {collectiblesQuery.data?.mints?.map((mint: CollectionMint) => (
-              <div
-                key={mint.id}
-                className='flex flex-col bg-gray-100 rounded-lg p-4'
-              >
-                <img
-                  className='w-40 h-40 rounded-lg object-contain'
-                  src={mint.metadataJson?.image as string}
-                />
-                <span className='font-bold mt-2'>
-                  {mint.metadataJson?.name}
-                </span>
-              </div>
-            ))}
+            {collectiblesQuery.data?.collectibles?.map(
+              (mint: CollectionMint) => (
+                <div
+                  key={mint.id}
+                  className='flex flex-col bg-gray-100 rounded-lg p-4'
+                >
+                  <img
+                    className='w-40 h-40 rounded-lg object-contain'
+                    src={mint.metadataJson?.image as string}
+                  />
+                  <span className='font-bold mt-2'>
+                    {mint.metadataJson?.name}
+                  </span>
+                </div>
+              )
+            )}
           </>
         )}
       </div>

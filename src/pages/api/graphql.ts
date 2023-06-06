@@ -90,12 +90,15 @@ export const queryResolvers: QueryResolvers<AppContext> = {
     return data.project.drops as [Drop];
   },
   async collectibles(_a, _b, { session, dataSources: { holaplex, db } }) {
+    console.log('Get collectibles');
     if (!session) {
       return null;
     }
     const user = await db.user.findFirst({
       where: { email: session.user?.email }
     });
+
+    console.log('user', user);
 
     if (!user || !user.holaplexCustomerId) {
       return null;
@@ -115,7 +118,7 @@ export const queryResolvers: QueryResolvers<AppContext> = {
 
     return data.project.customer?.mints as [CollectionMint];
   },
-  async subscription(_a, _b, { session, dataSources: { holaplex, db } }) {
+  async subscription(_a, _b, { session, dataSources: { db } }) {
     if (!session) {
       return null;
     }
