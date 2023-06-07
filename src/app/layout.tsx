@@ -19,6 +19,8 @@ export default async function Layout({
 }) {
   const session = await getServerSession(authOptions);
   const me = await userSource.get(session?.user?.email);
+  console.log('Session', session);
+  console.log('Me', me);
 
   return (
     <html lang='en'>

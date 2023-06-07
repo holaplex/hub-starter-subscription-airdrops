@@ -14,7 +14,7 @@ export default function CollectiblesPage() {
       <div className='flex flex-wrap gap-6 justify-center mt-4 mb-10'>
         {collectiblesQuery.loading ? (
           <>
-            {Array.from(Array(8)).map((index) => (
+            {Array.from(Array(8)).map((_, index) => (
               <div key={index}>
                 <div className='w-52 h-52 rounded-lg bg-gray-600 animate-pulse' />
               </div>
