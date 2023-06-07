@@ -9,7 +9,6 @@ interface GetCollectiblesData {
 
 export default function CollectiblesPage() {
   const collectiblesQuery = useQuery<GetCollectiblesData>(GetCollectibles);
-  console.log('collectibles query', collectiblesQuery);
   return (
     <div>
       <div className='flex flex-wrap gap-6 justify-center mt-4 mb-10'>

@@ -117,7 +117,7 @@ export default function Hero() {
               </span>
               <button
                 onClick={onUnsubscribe}
-                className='text-cta font-bold md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6 mt-10'
+                className='text-gray-400 font-bold md:bg-gray-200 md:rounded-full md:font-bold md:py-3 md:px-6 mt-10'
               >
                 Cancel subscription
               </button>

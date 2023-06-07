@@ -1,9 +1,9 @@
-import Drips from './Drips';
+import Home from './Home';
 
 export default async function HomeLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
-  return <Drips>{children}</Drips>;
+  return <Home>{children}</Home>;
 }
