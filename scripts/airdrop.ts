@@ -66,7 +66,7 @@ const DROPS_QUERY = gql`
   }
 `;
 
-export const init = async () => {
+export const start = async () => {
   console.log('Start Airdrop');
   console.log('Project id', process.env.HOLAPLEX_PROJECT_ID);
   const result = await holaplex.query<GetDropsData, GetDropsVars>({
@@ -146,5 +146,5 @@ const mint = async (dropId: string) => {
 };
 
 (async () => {
-  await init();
+  await start();
 })();
