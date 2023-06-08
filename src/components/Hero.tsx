@@ -108,10 +108,13 @@ export default function Hero() {
         <div className='flex flex-col items-center mt-20'>
           <span className='font-semibold text-5xl'>Holaplex drip</span>
           {subscriptionQuery.loading ? (
-            <></>
+            <>
+              <div className='w-60 h-6 rounded-full bg-gray-600 animate-pulse mt-3' />
+              <div className='w-32 h-12 rounded-full bg-gray-600 animate-pulse mt-10' />
+            </>
           ) : subscriptionQuery.data?.subscription?.subscribedAt ? (
             <>
-              <span className='font-medium mt-3 text-gray-500'>
+              <span className='font-medium mt-3 text-gray-500 text-center'>
                 You&apos;re subscribed! You will now receive new collectibles
                 each week.
               </span>
@@ -124,7 +127,7 @@ export default function Hero() {
             </>
           ) : (
             <>
-              <span className='font-medium mt-3 text-gray-500'>
+              <span className='font-medium mt-3 text-gray-500 text-center'>
                 Sign up to receive new collectibles each week!
               </span>
               <button

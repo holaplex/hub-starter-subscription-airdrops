@@ -43,6 +43,15 @@ export const GetSubscription: DocumentNode;
 }
     
 
+declare module '*/airdrops.graphql' {
+  import { DocumentNode } from 'graphql';
+  const defaultDocument: DocumentNode;
+  export const GetPastDrips: DocumentNode;
+
+  export default defaultDocument;
+}
+    
+
 declare module '*/collectibles.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;

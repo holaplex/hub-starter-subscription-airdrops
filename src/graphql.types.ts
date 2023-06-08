@@ -87,6 +87,13 @@ export type ActionCost = {
 /** An enum type named Affiliation that defines a user's association to an organization. The enum is derived using a Union attribute. It has two variants, each containing an associated data type: */
 export type Affiliation = Member | Owner;
 
+export type Airdrop = {
+  __typename?: 'Airdrop';
+  completedAt?: Maybe<Scalars['String']>;
+  drop?: Maybe<Drop>;
+  startedAt?: Maybe<Scalars['String']>;
+};
+
 /** Fireblocks-defined blockchain identifiers. */
 export enum AssetType {
   /** Ethereum Mainnet */
@@ -1270,6 +1277,7 @@ export type Query = {
   me?: Maybe<User>;
   /** Query an organization by its ID, this query returns `null` if the organization does not exist. */
   organization?: Maybe<Organization>;
+  pastDrips?: Maybe<Array<Maybe<Airdrop>>>;
   /** Query a project by it's ID, this query returns `null` if the project does not exist. */
   project?: Maybe<Project>;
   subscription?: Maybe<Subscription>;
@@ -1530,6 +1538,7 @@ export type ResolversTypes = {
   Action: Action;
   ActionCost: ResolverTypeWrapper<ActionCost>;
   Affiliation: ResolverTypeWrapper<ResolversUnionTypes['Affiliation']>;
+  Airdrop: ResolverTypeWrapper<Airdrop>;
   AssetType: AssetType;
   Blockchain: Blockchain;
   BlockchainCost: ResolverTypeWrapper<BlockchainCost>;
@@ -1631,6 +1640,7 @@ export type ResolversParentTypes = {
   AccessToken: AccessToken;
   ActionCost: ActionCost;
   Affiliation: ResolversUnionTypes['Affiliation'];
+  Airdrop: Airdrop;
   BlockchainCost: BlockchainCost;
   Boolean: Scalars['Boolean'];
   Collection: Collection;
@@ -1745,6 +1755,13 @@ export type ActionCostResolvers<ContextType = any, ParentType extends ResolversP
 
 export type AffiliationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Affiliation'] = ResolversParentTypes['Affiliation']> = {
   __resolveType: TypeResolveFn<'Member' | 'Owner', ParentType, ContextType>;
+};
+
+export type AirdropResolvers<ContextType = any, ParentType extends ResolversParentTypes['Airdrop'] = ResolversParentTypes['Airdrop']> = {
+  completedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  drop?: Resolver<Maybe<ResolversTypes['Drop']>, ParentType, ContextType>;
+  startedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type BlockchainCostResolvers<ContextType = any, ParentType extends ResolversParentTypes['BlockchainCost'] = ResolversParentTypes['BlockchainCost']> = {
@@ -2118,6 +2135,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   invite?: Resolver<Maybe<ResolversTypes['Invite']>, ParentType, ContextType, RequireFields<QueryInviteArgs, 'id'>>;
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   organization?: Resolver<Maybe<ResolversTypes['Organization']>, ParentType, ContextType, RequireFields<QueryOrganizationArgs, 'id'>>;
+  pastDrips?: Resolver<Maybe<Array<Maybe<ResolversTypes['Airdrop']>>>, ParentType, ContextType>;
   project?: Resolver<Maybe<ResolversTypes['Project']>, ParentType, ContextType, RequireFields<QueryProjectArgs, 'id'>>;
   subscription?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
@@ -2210,6 +2228,7 @@ export type Resolvers<ContextType = any> = {
   AccessToken?: AccessTokenResolvers<ContextType>;
   ActionCost?: ActionCostResolvers<ContextType>;
   Affiliation?: AffiliationResolvers<ContextType>;
+  Airdrop?: AirdropResolvers<ContextType>;
   BlockchainCost?: BlockchainCostResolvers<ContextType>;
   Collection?: CollectionResolvers<ContextType>;
   CollectionCreator?: CollectionCreatorResolvers<ContextType>;

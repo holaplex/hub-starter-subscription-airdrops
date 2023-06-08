@@ -19,12 +19,19 @@ type Subscription {
   subscribedAt: String
 }
 
+type Airdrop {
+  drop: Drop
+  startedAt: String
+  completedAt: String
+}
+
 type Query {
   me: User
   drop: Drop
   drops: [Drop]
   collectibles: [CollectionMint]
   subscription: Subscription
+  pastDrips: [Airdrop]
 }
 
 type Mutation {

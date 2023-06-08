@@ -55,6 +55,12 @@ An enum type named Affiliation that defines a user's association to an organizat
 """
 union Affiliation = Member | Owner
 
+type Airdrop {
+  completedAt: String
+  drop: Drop
+  startedAt: String
+}
+
 """Fireblocks-defined blockchain identifiers."""
 enum AssetType {
   """Ethereum Mainnet"""
@@ -1356,6 +1362,7 @@ type Query {
   Query an organization by its ID, this query returns `null` if the organization does not exist.
   """
   organization(id: UUID!): Organization
+  pastDrips: [Airdrop]
 
   """
   Query a project by it's ID, this query returns `null` if the project does not exist.

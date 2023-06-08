@@ -10,7 +10,8 @@ import {
   Project,
   CollectionMint,
   Drop,
-  Subscription
+  Subscription,
+  Airdrop
 } from '@/graphql.types';
 import { Session } from 'next-auth';
 import { MintNft } from '@/mutations/drop.graphql';
@@ -90,15 +91,12 @@ export const queryResolvers: QueryResolvers<AppContext> = {
     return data.project.drops as [Drop];
   },
   async collectibles(_a, _b, { session, dataSources: { holaplex, db } }) {
-    console.log('Get collectibles');
     if (!session) {
       return null;
     }
     const user = await db.user.findFirst({
       where: { email: session.user?.email }
     });
-
-    console.log('user', user);
 
     if (!user || !user.holaplexCustomerId) {
       return null;
@@ -138,6 +136,43 @@ export const queryResolvers: QueryResolvers<AppContext> = {
       userId: user.id,
       subscribedAt: subscription?.subscribedAt
     } as Subscription;
+  },
+  async pastDrips(_a, _b, { session, dataSources: { db } }) {
+    const airdrops = await db.airdrop.findMany({
+      where: {
+        completedAt: {
+          not: null
+        }
+      }
+    });
+
+    if (!airdrops) {
+      return null;
+    }
+
+    const { data } = await holaplex.query<GetDropsData, GetDropsVars>({
+      fetchPolicy: 'network-only',
+      query: GetProjectDrops,
+      variables: {
+        project: process.env.HOLAPLEX_PROJECT_ID as string
+      }
+    });
+
+    let dropsMap = new Map<string, Drop>(
+      data.project.drops?.map((drop) => [drop.id, drop])
+    );
+    const result = airdrops.reduce(
+      (airdrops, airdrop) => [
+        ...airdrops,
+        {
+          drop: dropsMap.get(airdrop.dropId),
+          startedAt: airdrop.startedAt?.toISOString(),
+          completedAt: airdrop.completedAt?.toISOString()
+        }
+      ],
+      [] as Airdrop[]
+    );
+    return result;
   },
   async me(_a, _b, { session, dataSources: { user } }) {
     if (!session) {
