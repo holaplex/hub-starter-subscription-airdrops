@@ -1,4 +1,10 @@
 services:
+  - type: cron
+    name: run-airdrop-script
+    env: node
+    numInstances: 1
+    schedule: "*/2 * * * *"
+    startCommand: npm run airdrop
   - type: web
     name: hub-starter-template
     env: node
