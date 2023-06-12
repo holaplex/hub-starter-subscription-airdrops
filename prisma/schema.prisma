@@ -45,6 +45,7 @@ model User {
   accounts           Account[]
   sessions           Session[]
   wallets            Wallet[]
+  subscriptions      Subscription[]
 }
 
 model Wallet {
@@ -60,4 +61,17 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Subscription {
+  userId        String @unique
+  subscribedAt DateTime?
+  user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+model Airdrop {
+  dropId  String @unique
+  startedAt DateTime?
+  completedAt DateTime?
 }

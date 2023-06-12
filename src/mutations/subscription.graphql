@@ -1,0 +1,13 @@
+mutation Subscribe {
+  subscribe {
+    userId
+    subscribedAt
+  }
+}
+
+mutation Unsubscribe {
+  unsubscribe {
+    userId
+    subscribedAt
+  }
+}

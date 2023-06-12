@@ -14,11 +14,28 @@ type User {
   wallet: Wallet
 }
 
-type Query {
+type Subscription {
+  userId: String
+  subscribedAt: String
+}
+
+type Airdrop {
   drop: Drop
+  startedAt: String
+  completedAt: String
+}
+
+type Query {
   me: User
+  drop: Drop
+  drops: [Drop]
+  collectibles: [CollectionMint]
+  subscription: Subscription
+  pastDrips: [Airdrop]
 }
 
 type Mutation {
   mint: CollectionMint
+  subscribe: Subscription
+  unsubscribe: Subscription
 }
