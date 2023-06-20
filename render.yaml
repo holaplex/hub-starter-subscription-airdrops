@@ -3,8 +3,8 @@ services:
     name: run-airdrop-script
     env: node
     numInstances: 1
-    schedule: "*/2 * * * *"
-    startCommand: "echo started: $(date) >> log; npm install; npx prisma generate; npm run airdrop;echo finished: $(date) >> log"
+    schedule: "*/4 * * * *"
+    startCommand: npm install; npx prisma generate; npm run airdrop
     envVars:
     - key: HOLAPLEX_PROJECT_ID
       sync: false
