@@ -5,6 +5,13 @@ services:
     numInstances: 1
     schedule: "*/2 * * * *"
     startCommand: cd scripts; npm install; npm run airdrop
+    envVars:
+    - key: HOLAPLEX_PROJECT_ID
+      sync: false
+    - key: HOLAPLEX_AUTH_TOKEN
+      sync: false
+    - key: HOLAPLEX_API_ENDPOINT
+      value: https://api.holaplex.com/graphql
   - type: web
     name: hub-starter-template
     env: node

@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "ts-node": "^10.9.1",
-    "prisma": "^4.9.0",
-    "graphql": "^16.6.0"
+    "@apollo/client": "^3.7.10",
+    "@prisma/client": "^4.9.0"
   }
 }
