@@ -14,6 +14,7 @@
     "generate": "prisma generate",
     "reset": "prisma migrate reset --force",
     "codegen": "graphql-codegen",
+    "airdrop": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" -T ./scripts/airdrop.ts",
     "db": "prisma migrate deploy"
   },
   "dependencies": {
