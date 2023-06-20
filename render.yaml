@@ -4,7 +4,7 @@ services:
     env: node
     numInstances: 1
     schedule: "*/2 * * * *"
-    startCommand: npm run airdrop
+    startCommand: cd scripts; npm install; npm run airdrop
   - type: web
     name: hub-starter-template
     env: node

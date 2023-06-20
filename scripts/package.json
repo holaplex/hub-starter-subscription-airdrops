@@ -1,0 +1,12 @@
+{
+  "name": "airdrop-script",
+  "version": "1.0.0",
+  "scripts": {
+    "airdrop": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" -T airdrop.ts"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.1",
+    "prisma": "^4.9.0",
+    "graphql": "^16.6.0"
+  }
+}
