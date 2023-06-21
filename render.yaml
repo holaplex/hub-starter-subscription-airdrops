@@ -1,10 +1,12 @@
 services:
-  - type: cron
+  - type: web
     name: run-airdrop-script
     env: node
     numInstances: 1
-    schedule: "*/4 * * * *"
-    startCommand: npm install; npx prisma generate; npm run airdrop
+    #schedule: "*/4 * * * *"
+    #startCommand: npm install; npx prisma generate; npm run airdrop
+    buildCommand: npm install; npx prisma generate
+    startCommand: "bash -c 'while true;do npm run airdrop; sleep 120;done'"
     envVars:
     - key: HOLAPLEX_PROJECT_ID
       sync: false
