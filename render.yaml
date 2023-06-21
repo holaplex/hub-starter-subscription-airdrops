@@ -1,5 +1,5 @@
 services:
-  - type: web
+  - type: worker
     name: run-airdrop-script
     env: node
     numInstances: 1
