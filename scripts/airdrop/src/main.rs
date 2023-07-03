@@ -8,7 +8,7 @@ mod db;
 
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "../../holaplex.graphql",
+    schema_path = "holaplex.graphql",
     query_path = "queries/get_drops.graphql",
     response_derives = "Debug, Serialize"
 )]
@@ -16,7 +16,7 @@ struct GetDrops;
 
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "../../holaplex.graphql",
+    schema_path = "holaplex.graphql",
     query_path = "queries/mint_edition.graphql",
     response_derives = "Debug"
 )]
