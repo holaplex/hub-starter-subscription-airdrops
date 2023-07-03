@@ -1,182 +1,136 @@
-use graphql_client::{GraphQLQuery, Response};
-use reqwest::blocking::Client;
-use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Utc};
+use graphql_client::GraphQLQuery;
+use reqwest::Url;
+use std::env;
+use sqlx::PgPool;
+use tokio::time::{sleep, Duration};
+
+mod db;
 
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "schema.graphql",
     query_path = "queries/get_drops.graphql",
-    mutation_path = "mutations/mint.graphql",
-    response_derives = "Debug,Serialize,Deserialize"
+    response_derives = "Debug"
 )]
 struct GetDropsQuery;
 
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "schema.graphql",
-    query_path = "queries/mint.graphql",
-    response_derives = "Debug,Serialize,Deserialize"
+    query_path = "queries/mint_edition.graphql",
+    response_derives = "Debug"
 )]
-struct MintMutation;
+struct MintEditionMutation;
 
-#[derive(Debug, Deserialize)]
-struct GetDropsData {
-    project: Project,
-}
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize the GraphQL client
+    let graphql_endpoint = env::var("GRAPHQL_ENDPOINT").expect("GRAPHQL_ENDPOINT not set");
+    let graphql_auth_token = env::var("GRAPHQL_AUTH_TOKEN").expect("GRAPHQL_AUTH_TOKEN not set");
+    let graphql_client = reqwest::Client::new();
+    let graphql_url = Url::parse(&graphql_endpoint)?;
+    let db_pool = PgPool::connect(&env::var("DATABASE_URL").expect("DATABASE_URL not set")).await?;
 
-#[derive(Debug, Deserialize)]
-struct Project {
-    id: String,
-    drops: Option<Vec<Drop>>,
-}
+    // Call the start function
+    start(&graphql_client, &graphql_url, &db_pool).await?;
 
-#[derive(Debug, Deserialize)]
-struct Drop {
-    id: String,
-    startTime: Option<String>,
-    endTime: Option<String>,
-    collection: Option<Collection>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Collection {
-    totalMints: Option<i32>,
-    supply: Option<i32>,
-    id: Option<String>,
-    address: Option<String>,
-    holders: Option<Vec<Holder>>,
-    metadataJson: Option<MetadataJson>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Holder {
-    address: Option<String>,
-    owns: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct MetadataJson {
-    id: Option<String>,
-    image: Option<String>,
-    name: Option<String>,
-    description: Option<String>,
-    attributes: Option<Vec<Attribute>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Attribute {
-    traitType: Option<String>,
-    value: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct MintNftData {
-    mintEdition: Option<MintEditionPayload>,
-}
-
-#[derive(Debug, Deserialize)]
-struct MintEditionPayload {
-    collectionMint: Option<CollectionMint>,
-}
-
-#[derive(Debug, Deserialize)]
-struct CollectionMint {
-    address: Option<String>,
-    owner: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-struct MintNftVars {
-    input: MintDropInput,
-}
-
-#[derive(Debug, Serialize)]
-struct MintDropInput {
-    drop: String,
-    recipient: String,
-}
-
-#[derive(Debug, Serialize)]
-struct GetDropsVars {
-    project: String,
-}
-
-fn main() {
-    tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(2)
-        .build()
-        .unwrap()
-        .block_on(start());
-}
-
-async fn start() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Start Airdrop");
-    println!("Project id: {}", std::env::var("HOLAPLEX_PROJECT_ID")?);
-    let client = Client::new();
-    let variables = GetDropsVars {
-        project: std::env::var("HOLAPLEX_PROJECT_ID")?,
-    };
-
-    let response_body = client
-        .post(process.env.HOLAPLEX_API_ENDPOINT)
-        .header("Authorization", process.env.HOLAPLEX_AUTH_TOKEN)
-        .json(&GetDropsQuery::build_query(variables))
-        .send()?
-        .text()?;
-
-    let response_data: Response<get_drops_query::ResponseData> =
-        serde_json::from_str(&response_body)?;
-
-    let result = response_data.data.expect("No response data");
-
-    if let Some(drops) = result.project.drops {
-        for drop in drops {
-            println!("{:?}", drop);
-            if drop.startTime.is_none() || drop.startTime.unwrap() <= chrono::Utc::now().to_rfc3339() {
-                println!("Drop open for minting: {}", drop.id);
-            }
-            if let Some(airdrop) = db::airdrop.find_first(drop.id) {
-                println!("airdrop: {:?}", airdrop);
-            }
-            if airdrop.is_none() || airdrop.unwrap().completedAt.is_none() {
-                let update_start_time = db::airdrop.upsert(drop.id, new Date());
-                println!("Add starttime: {:?}", update_start_time);
-
-                println!("Start minting");
-                mint(drop.id).await?;
-
-                let update_end_time = db::airdrop.upsert(drop.id, new Date());
-                println!("Add endTime: {:?}", update_end_time);
-            }
-        }
-    }
     Ok(())
 }
 
-async fn mint(drop_id: String) -> Result<(), Box<dyn std::error::Error>> {
-    let subscriptions = db::subscription.find_many().await?;
-    println!("Subscriptions: {:?}", subscriptions);
-    for sub in subscriptions {
-        if let Some(wallet) = db::wallet.find_first(sub.user.id).await? {
-            println!("Wallet: {:?}", wallet);
-            let variables = MintNftVars {
-                input: MintDropInput {
-                    drop: drop_id.clone(),
-                    recipient: wallet.address.clone(),
-                },
-            };
-            let response_body = client
-                .post(process.env.HOLAPLEX_API_ENDPOINT)
-                .header("Authorization", process.env.HOLAPLEX_AUTH_TOKEN)
-                .json(&MintMutation::build_query(variables))
-                .send()?
-                .text()?;
-            
-            let response_data: Response<mint_nft_mutation::ResponseData> =
-                serde_json::from_str(&response_body)?;
-            let result = response_data.data.expect("No response data");
-            println!("Mint result: {:?}", result.mintEdition);
+async fn start(
+    graphql_client: &reqwest::Client,
+    graphql_url: &Url,
+    db_pool: &PgPool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    println!("Start Airdrop");
+    let project_id = env::var("HOLAPLEX_PROJECT_ID").expect("HOLAPLEX_PROJECT_ID not set");
+
+    let drops_result = graphql_client
+        .post(graphql_url.clone())
+        .header("Authorization", &env::var("GRAPHQL_AUTH_TOKEN").expect("GRAPHQL_AUTH_TOKEN not set"))
+        .json(&GetDropsQuery::build_query(get_drops_query::Variables {
+            project: project_id,
+        }))
+        .send()
+        .await?;
+
+    let drops_response: graphql_client::Response<get_drops_query::ResponseData> =
+        drops_result.json().await?;
+
+    if let Some(drops) = drops_response
+        .data
+        .and_then(|data| data.project)
+        .and_then(|project| project.drops)
+    {
+        for drop in drops {
+            println!("{:?}", drop);
+            let airdrop = db::find_airdrop_by_drop_id(&db_pool, &drop.id).await?;
+
+            println!("airdrop {:?}", airdrop);
+
+            if let Some(airdrop) = airdrop {
+                if drop.start_time.is_none() || drop.start_time.unwrap() <= Utc::now() {
+                    println!("Drop open for minting: {:?}", drop.id);
+                }
+
+                if airdrop.completed_at.is_none() {
+                    // Set Airdrop starttime
+                    let _ = db::upsert_airdrop(
+                        &db_pool,
+                        &airdrop.drop_id,
+                        Some(Utc::now()),
+                        None,
+                    )
+                    .await?;
+                    println!("Add starttime: {:?}", update_start_time);
+
+                    // Airdrop
+                    println!("Start minting");
+                    mint(&db_pool, &drop.id).await?;
+
+                    // Set Airdrop endtime
+                    let _ = db::upsert_airdrop(
+                        &db_pool,
+                        &airdrop.drop_id,
+                        None,
+                        Some(Utc::now()),
+                    )
+                    .await?;
+                    println!("Add endTime: {:?}", update_end_time);
+                }
+            }
         }
     }
+
+    Ok(())
+}
+
+async fn mint(db_pool: &PgPool, drop_id: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let subscriptions = db::find_subscriptions(&db_pool).await?;
+    println!("Subscriptions: {:?}", subscriptions);
+
+    for subscription in subscriptions {
+        let wallet = db::find_wallet_by_user_id(&db_pool, subscription.user_id).await?;
+        println!("Wallet: {:?}", wallet);
+
+        let result = graphql_client
+            .post(graphql_url.clone())
+            .header("Authorization", &env::var("GRAPHQL_AUTH_TOKEN").expect("GRAPHQL_AUTH_TOKEN not set"))
+            .json(&MintEditionMutation::build_query(mint_edition_mutation::Variables {
+                input: mint_edition_mutation::MintDropInput {
+                    drop: drop_id.to_owned(),
+                    recipient: wallet.address.unwrap_or_default(),
+                },
+            }))
+            .send()
+            .await?;
+
+        let mint_result: graphql_client::Response<mint_edition_mutation::ResponseData> =
+            result.json().await?;
+
+        println!("Mint result: {:?}", mint_result.data);
+    }
+
     Ok(())
 }

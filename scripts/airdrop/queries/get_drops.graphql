@@ -1,0 +1,30 @@
+query GetDrops($project: String!) {
+  project(id: $project) {
+    id
+    drops {
+      id
+      start_time
+      end_time
+      collection {
+        total_mints
+        supply
+        id
+        address
+        holders {
+          address
+          owns
+        }
+        metadata_json {
+          id
+          image
+          name
+          description
+          attributes {
+            traitType
+            value
+          }
+        }
+      }
+    }
+  }
+}
