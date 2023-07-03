@@ -1,17 +1,17 @@
 use serde::Serialize;
-use sqlx::types::chrono::NaiveDateTime;
+use sqlx::{query, query_as, types::chrono::NaiveDateTime, Error, FromRow, PgPool};
 
-#[derive(Debug, sqlx::FromRow, Serialize)]
+#[derive(Debug, FromRow, Serialize)]
 pub struct Airdrop {
     pub drop_id: String,
     pub completed_at: Option<NaiveDateTime>,
 }
 
 pub async fn find_airdrop_by_drop_id(
-    pool: &sqlx::PgPool,
+    pool: &PgPool,
     drop_id: &str,
-) -> Result<Option<Airdrop>, sqlx::Error> {
-    sqlx::query_as::<_, Airdrop>(
+) -> Result<Option<Airdrop>, Error> {
+    query_as::<_, Airdrop>(
         r#"
         SELECT *
         FROM "Airdrop"
@@ -24,12 +24,12 @@ pub async fn find_airdrop_by_drop_id(
 }
 
 pub async fn upsert_airdrop(
-    pool: &sqlx::PgPool,
+    pool: &PgPool,
     drop_id: &str,
     started_at: Option<NaiveDateTime>,
     completed_at: Option<NaiveDateTime>,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+) -> Result<(), Error> {
+    query!(
         r#"
         INSERT INTO "Airdrop" ("dropId", "startedAt", "completedAt")
         VALUES ($1, $2, $3)
@@ -45,14 +45,14 @@ pub async fn upsert_airdrop(
     Ok(())
 }
 
-#[derive(Debug, sqlx::FromRow, Serialize)]
+#[derive(Debug, FromRow, Serialize)]
 pub struct Subscription {
     pub user_id: i32,
     pub subscribed_at: Option<chrono::NaiveDateTime>,
 }
 
-pub async fn find_subscriptions(pool: &sqlx::PgPool) -> Result<Vec<Subscription>, sqlx::Error> {
-    sqlx::query_as::<_, Subscription>(
+pub async fn find_subscriptions(pool: &PgPool) -> Result<Vec<Subscription>, Error> {
+    query_as::<_, Subscription>(
         r#"
         SELECT *
         FROM "Subscription"
@@ -63,16 +63,13 @@ pub async fn find_subscriptions(pool: &sqlx::PgPool) -> Result<Vec<Subscription>
     .await
 }
 
-#[derive(Debug, sqlx::FromRow, Serialize)]
+#[derive(Debug, FromRow, Serialize)]
 pub struct Wallet {
     pub address: Option<String>,
 }
 
-pub async fn find_wallet_by_user_id(
-    pool: &sqlx::PgPool,
-    user_id: i32,
-) -> Result<Option<Wallet>, sqlx::Error> {
-    sqlx::query_as::<_, Wallet>(
+pub async fn find_wallet_by_user_id(pool: &PgPool, user_id: i32) -> Result<Option<Wallet>, Error> {
+    query_as::<_, Wallet>(
         r#"
         SELECT *
         FROM "Wallet"
