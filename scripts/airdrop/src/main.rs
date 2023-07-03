@@ -18,7 +18,7 @@ struct GetDropsQuery;
 
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "schema.graphql",
+    schema_path = "holaplex.graphql",
     query_path = "queries/mint_edition.graphql",
     response_derives = "Debug"
 )]
