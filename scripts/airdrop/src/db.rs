@@ -1,94 +1,84 @@
-use sqlx::postgres::PgPool;
 use sqlx::types::chrono::NaiveDateTime;
-use sqlx::FromRow;
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct Airdrop {
-    pub id: i32,
     pub drop_id: String,
-    pub started_at: Option<NaiveDateTime>,
     pub completed_at: Option<NaiveDateTime>,
 }
 
 pub async fn find_airdrop_by_drop_id(
-    db_pool: &PgPool,
+    pool: &sqlx::PgPool,
     drop_id: &str,
 ) -> Result<Option<Airdrop>, sqlx::Error> {
-    sqlx::query_as!(
-        Airdrop,
+    sqlx::query_as::<_, Airdrop>(
         r#"
         SELECT *
-        FROM airdrop
-        WHERE drop_id = $1
+        FROM "Airdrop"
+        WHERE "dropId" = $1
         "#,
-        drop_id
     )
-    .fetch_optional(db_pool)
+    .bind(drop_id)
+    .fetch_optional(pool)
     .await
 }
 
 pub async fn upsert_airdrop(
-    db_pool: &PgPool,
+    pool: &sqlx::PgPool,
     drop_id: &str,
     started_at: Option<NaiveDateTime>,
     completed_at: Option<NaiveDateTime>,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
-        INSERT INTO airdrop (drop_id, started_at, completed_at)
+        INSERT INTO "Airdrop" ("dropId", "startedAt", "completedAt")
         VALUES ($1, $2, $3)
-        ON CONFLICT (drop_id)
-        DO UPDATE SET started_at = EXCLUDED.started_at, completed_at = EXCLUDED.completed_at
+        ON CONFLICT ("dropId")
+        DO UPDATE SET "startedAt" = EXCLUDED."startedAt", "completedAt" = EXCLUDED."completedAt"
         "#,
         drop_id,
         started_at,
         completed_at
     )
-    .execute(db_pool)
+    .execute(pool)
     .await?;
     Ok(())
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct Subscription {
-    pub id: i32,
     pub user_id: i32,
+    pub subscribed_at: Option<chrono::NaiveDateTime>,
 }
 
-pub async fn find_subscriptions(
-    db_pool: &PgPool,
-) -> Result<Vec<Subscription>, sqlx::Error> {
-    sqlx::query_as!(
-        Subscription,
+pub async fn find_subscriptions(pool: &sqlx::PgPool) -> Result<Vec<Subscription>, sqlx::Error> {
+    sqlx::query_as::<_, Subscription>(
         r#"
         SELECT *
-        FROM subscription
-        WHERE subscribed_at IS NOT NULL
+        FROM "Subscription"
+        WHERE "subscribedAt" IS NOT NULL
         "#,
     )
-    .fetch_all(db_pool)
+    .fetch_all(pool)
     .await
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct Wallet {
-    pub id: i32,
     pub address: Option<String>,
 }
 
 pub async fn find_wallet_by_user_id(
-    db_pool: &PgPool,
+    pool: &sqlx::PgPool,
     user_id: i32,
 ) -> Result<Option<Wallet>, sqlx::Error> {
-    sqlx::query_as!(
-        Wallet,
+    sqlx::query_as::<_, Wallet>(
         r#"
         SELECT *
-        FROM wallet
-        WHERE user_id = $1
+        FROM "Wallet"
+        WHERE "holaplexCustomerId" = $1
         "#,
-        user_id
     )
-    .fetch_optional(db_pool)
+    .bind(user_id)
+    .fetch_optional(pool)
     .await
 }

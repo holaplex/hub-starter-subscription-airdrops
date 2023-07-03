@@ -1,12 +1,12 @@
-query GetDrops($project: String!) {
+query GetDrops($project: UUID!) {
   project(id: $project) {
     id
     drops {
       id
-      start_time
-      end_time
+      startTime
+      endTime
       collection {
-        total_mints
+        totalMints
         supply
         id
         address
@@ -14,7 +14,7 @@ query GetDrops($project: String!) {
           address
           owns
         }
-        metadata_json {
+        metadataJson {
           id
           image
           name

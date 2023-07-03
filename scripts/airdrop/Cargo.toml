@@ -11,3 +11,5 @@ reqwest = { version = "0.11.3", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 chrono = { version = "0.4", features = ["serde"] }
 sqlx = { version = "0.6.2", default-features = false, features = ["runtime-tokio-native-tls", "macros", "postgres", "chrono"] }
+uuid = { version = "1.4.0", features = ["v4", "serde"] }
+dotenv = "0.15.0"
