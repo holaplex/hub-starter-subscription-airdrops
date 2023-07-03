@@ -1,15 +1,16 @@
-use chrono::{DateTime, Utc};
-use graphql_client::GraphQLQuery;
+use chrono::Utc;
+use graphql_client::{reqwest::post_graphql, GraphQLQuery};
 use reqwest::Url;
 use std::env;
 use sqlx::PgPool;
 use tokio::time::{sleep, Duration};
+use serde_json::json;
 
 mod db;
 
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "schema.graphql",
+    schema_path = "holaplex.graphql",
     query_path = "queries/get_drops.graphql",
     response_derives = "Debug"
 )]
@@ -49,11 +50,12 @@ async fn start(
     let drops_result = graphql_client
         .post(graphql_url.clone())
         .header("Authorization", &env::var("GRAPHQL_AUTH_TOKEN").expect("GRAPHQL_AUTH_TOKEN not set"))
-        .json(&GetDropsQuery::build_query(get_drops_query::Variables {
+        .body(&GetDropsQuery::build_query(get_drops_query::Variables {
             project: project_id,
         }))
         .send()
         .await?;
+
 
     let drops_response: graphql_client::Response<get_drops_query::ResponseData> =
         drops_result.json().await?;
@@ -70,7 +72,7 @@ async fn start(
             println!("airdrop {:?}", airdrop);
 
             if let Some(airdrop) = airdrop {
-                if drop.start_time.is_none() || drop.start_time.unwrap() <= Utc::now() {
+                if drop.start_time.is_none() || drop.start_time.unwrap() <= Utc::now().naive_local() {
                     println!("Drop open for minting: {:?}", drop.id);
                 }
 
@@ -79,7 +81,7 @@ async fn start(
                     let _ = db::upsert_airdrop(
                         &db_pool,
                         &airdrop.drop_id,
-                        Some(Utc::now()),
+                        Some(Utc::now().naive_local()),
                         None,
                     )
                     .await?;
@@ -94,7 +96,7 @@ async fn start(
                         &db_pool,
                         &airdrop.drop_id,
                         None,
-                        Some(Utc::now()),
+                        Some(Utc::now().naive_local()),
                     )
                     .await?;
                     println!("Add endTime: {:?}", update_end_time);
@@ -117,10 +119,10 @@ async fn mint(db_pool: &PgPool, drop_id: &str) -> Result<(), Box<dyn std::error:
         let result = graphql_client
             .post(graphql_url.clone())
             .header("Authorization", &env::var("GRAPHQL_AUTH_TOKEN").expect("GRAPHQL_AUTH_TOKEN not set"))
-            .json(&MintEditionMutation::build_query(mint_edition_mutation::Variables {
+            .body(&MintEditionMutation::build_query(mint_edition_mutation::Variables {
                 input: mint_edition_mutation::MintDropInput {
                     drop: drop_id.to_owned(),
-                    recipient: wallet.address.unwrap_or_default(),
+                    recipient: wallet.unwrap_or_default().address,
                 },
             }))
             .send()

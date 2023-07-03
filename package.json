@@ -15,7 +15,7 @@
     "reset": "prisma migrate reset --force",
     "codegen": "graphql-codegen",
     "airdrop_ts": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" -T ./scripts/airdrop.ts",
-    "airdrop": "rustup run nightly cargo run --release --manifest-path=airdrop/Cargo.toml",
+    "airdrop": "cd ./scripts/airdrop && cargo run",
     "db": "prisma migrate deploy"
   },
   "dependencies": {

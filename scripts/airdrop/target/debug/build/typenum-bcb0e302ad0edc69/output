@@ -1,0 +1,3 @@
+cargo:rerun-if-changed=build/main.rs
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/pwarrior/Downloads/Codes/holaplex/hub-starters/hub-starter-subscription-airdrops/scripts/airdrop/target/debug/build/typenum-bcb0e302ad0edc69/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/pwarrior/Downloads/Codes/holaplex/hub-starters/hub-starter-subscription-airdrops/scripts/airdrop/target/debug/build/typenum-bcb0e302ad0edc69/out/op.rs
