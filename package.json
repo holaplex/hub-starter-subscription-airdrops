@@ -14,7 +14,8 @@
     "generate": "prisma generate",
     "reset": "prisma migrate reset --force",
     "codegen": "graphql-codegen",
-    "airdrop": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" -T ./scripts/airdrop.ts",
+    "airdrop_ts": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" -T ./scripts/airdrop.ts",
+    "airdrop": "rustup run nightly cargo run --release --manifest-path=airdrop/Cargo.toml",
     "db": "prisma migrate deploy"
   },
   "dependencies": {
@@ -38,16 +39,16 @@
     "install": "^0.13.0",
     "micro": "^10.0.1",
     "next": "^13.3.1",
-    "next-auth": "^4.19.2",
+    "next-auth": "^4.22.1",
     "next-plugin-graphql": "^0.0.2",
     "npm": "^9.6.1",
     "prisma": "^4.9.0",
     "ramda": "^0.28.0",
     "react": "^18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "^4.9.5",
+    "react-spinners": "^0.13.8",
     "ts-node": "^10.9.1",
-    "react-spinners": "^0.13.8"
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.16.4",
