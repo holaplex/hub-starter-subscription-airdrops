@@ -18,9 +18,8 @@ struct GetDrops;
 #[graphql(
     schema_path = "holaplex.graphql",
     query_path = "queries/mint_edition.graphql",
-    response_derives = "Debug"
+    response_derives = "Debug, Serialize"
 )]
-
 struct MintEdition;
 
 #[allow(clippy::upper_case_acronyms)]
@@ -66,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Start Airdrop");
+    println!("Starting Airdrop");
     let query = &GetDrops::build_query(get_drops::Variables {
         project: project_id,
     });
@@ -86,7 +85,7 @@ async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error
         .and_then(|project| project.drops)
     {
         for drop in drops {
-            println!("Got drops:\n {}", serde_json::to_string_pretty(&drop)?);
+            println!("Drops:\n {}", serde_json::to_string_pretty(&drop)?);
             let airdrop = db::find_airdrop_by_drop_id(&ctx.db_pool, &drop.id.to_string()).await?;
 
             println!("airdrop {:?}", airdrop);
@@ -110,7 +109,7 @@ async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error
                     // Airdrop
                     println!("Start minting");
                     if let Err(e) = mint(ctx, &drop.id.to_string()).await {
-                        println!("Error in minting: {:?}", e);
+                        println!("Error while minting: {:?}", e);
                         continue;
                     }
 
@@ -133,11 +132,15 @@ async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error
 
 async fn mint(ctx: &Context, drop_id: &str) -> Result<(), Box<dyn std::error::Error>> {
     let subscriptions = db::find_subscriptions(&ctx.db_pool).await?;
-    println!("Subscriptions: {:?}", subscriptions);
+    println!(
+        "Retrieving subscriptions\n {}",
+        serde_json::to_string_pretty(&subscriptions)?
+    );
 
     for subscription in subscriptions {
         let wallet = db::find_wallet_by_user_id(&ctx.db_pool, subscription.user_id).await?;
-        println!("Wallet: {:?}", wallet);
+        println!("Wallet\n {}", serde_json::to_string_pretty(&wallet)?);
+
         if let Some(wallet) = wallet {
             let mutation = MintEdition::build_query(mint_edition::Variables {
                 input: mint_edition::MintDropInput {

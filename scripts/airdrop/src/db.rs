@@ -1,6 +1,7 @@
+use serde::Serialize;
 use sqlx::types::chrono::NaiveDateTime;
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, sqlx::FromRow, Serialize)]
 pub struct Airdrop {
     pub drop_id: String,
     pub completed_at: Option<NaiveDateTime>,
@@ -44,7 +45,7 @@ pub async fn upsert_airdrop(
     Ok(())
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, sqlx::FromRow, Serialize)]
 pub struct Subscription {
     pub user_id: i32,
     pub subscribed_at: Option<chrono::NaiveDateTime>,
@@ -62,7 +63,7 @@ pub async fn find_subscriptions(pool: &sqlx::PgPool) -> Result<Vec<Subscription>
     .await
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, sqlx::FromRow, Serialize)]
 pub struct Wallet {
     pub address: Option<String>,
 }
