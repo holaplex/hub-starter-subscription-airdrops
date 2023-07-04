@@ -187,12 +187,11 @@ async fn mint(
                     Ok(response) => {
                         let res: GraphQLResponse<Value> = response.json().await?;
                         if let Some(errors) = res.errors {
-                            for error in errors {
-                                error!("Error: {}\nPath: {:?}", error.message, error.path);
-                            }
+                            let messages: Vec<_> = errors.iter().map(|e| &e.message).collect();
+                            let paths: Vec<_> = errors.iter().map(|e| &e.path).collect();
                             return Err(Box::new(std::io::Error::new(
                                 std::io::ErrorKind::Other,
-                                "GraphQL error.",
+                                format!("GraphQL errors: {:?} - path: {:?}", messages, paths),
                             )));
                         } else {
                             info!("Success: {}", res.data.unwrap().to_string())
