@@ -29,20 +29,22 @@ impl std::fmt::Display for UserFindError {
 
 impl std::error::Error for UserFindError {}
 
+// UserId, CustomerId, Wallet Address
+type UserRecord = Option<(Option<String>, Option<Uuid>, Option<String>)>;
+
 impl User {
     pub async fn find(db: &crate::PgPool, id: &str) -> Result<Self, UserFindError> {
-        let record: Result<Option<(Option<String>, Option<Uuid>, Option<String>)>, _> =
-            sqlx::query_as(
-                r#"
+        let record: Result<UserRecord, _> = sqlx::query_as(
+            r#"
             SELECT "User"."id", "User"."holaplexCustomerId", "Wallet"."address"
             FROM "User"
             INNER JOIN "Wallet" ON "User"."holaplexCustomerId" = "Wallet"."holaplexCustomerId"
             WHERE "User"."id" = $1
             "#,
-            )
-            .bind(id)
-            .fetch_optional(db)
-            .await;
+        )
+        .bind(id)
+        .fetch_optional(db)
+        .await;
 
         match record {
             Ok(Some((Some(id), Some(cust_id), Some(wallet)))) => Ok(User {
