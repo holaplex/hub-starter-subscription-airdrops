@@ -5,6 +5,10 @@ query GetDrops($project: UUID!) {
       id
       startTime
       endTime
+      purchases {
+        mintId
+		wallet
+      }
       collection {
         totalMints
         supply

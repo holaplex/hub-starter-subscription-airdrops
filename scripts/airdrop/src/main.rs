@@ -1,10 +1,14 @@
+use crate::get_drops::GetDropsProjectDrops;
 use chrono::Utc;
+use db::{Airdrop, Subscription};
 use graphql_client::GraphQLQuery;
+use log::{error, info, warn};
 use reqwest::{header, Url};
 use sqlx::PgPool;
 use std::env;
-
+use user::User;
 mod db;
+mod user;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -23,11 +27,11 @@ struct GetDrops;
 struct MintEdition;
 
 #[allow(clippy::upper_case_acronyms)]
-type UUID = uuid::Uuid;
+pub type UUID = uuid::Uuid;
 
 type DateTime = chrono::DateTime<Utc>;
 
-struct Context {
+pub struct Context {
     gql_client: reqwest::Client,
     api_endpoint: Url,
     db_pool: PgPool,
@@ -56,8 +60,10 @@ impl Context {
         })
     }
 }
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
     dotenv::vars();
     let context = Context::new().await?;
     let project_id = UUID::parse_str(&env::var("HOLAPLEX_PROJECT_ID")?)?;
@@ -65,64 +71,61 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Starting Airdrop");
-    let query = &GetDrops::build_query(get_drops::Variables {
+    info!("Starting Airdrop");
+    let query = GetDrops::build_query(get_drops::Variables {
         project: project_id,
     });
-    let drops_result = ctx
+
+    let response: graphql_client::Response<get_drops::ResponseData> = ctx
         .gql_client
         .post(ctx.api_endpoint.clone())
-        .json(query)
+        .json(&query)
         .send()
+        .await?
+        .json()
         .await?;
 
-    let drops_response: graphql_client::Response<get_drops::ResponseData> =
-        drops_result.json().await?;
-
-    if let Some(drops) = drops_response
+    let drops = response
         .data
-        .and_then(|data| data.project)
-        .and_then(|project| project.drops)
-    {
-        for drop in drops {
-            println!("Drops:\n {}", serde_json::to_string_pretty(&drop)?);
-            let airdrop = db::find_airdrop_by_drop_id(&ctx.db_pool, &drop.id.to_string()).await?;
+        .ok_or("missing response data")?
+        .project
+        .ok_or("missing project")?
+        .drops
+        .ok_or("missing drops")?;
 
-            println!("airdrop {:?}", airdrop);
+    for drop in drops {
+        if !(drop.start_time.is_none() || drop.start_time.unwrap() <= Utc::now()) {
+            warn!("Drop start_time not reached. skipping");
+            continue;
+        };
 
-            if let Some(airdrop) = airdrop {
-                if drop.start_time.is_none() || drop.start_time.unwrap() <= Utc::now() {
-                    println!("Drop open for minting: {:?}", drop.id);
-                }
+        let mut airdrop = Airdrop::find_by_drop_id(&ctx.db_pool, drop.id.to_string())
+            .await?
+            .unwrap_or_else(|| Airdrop::new(drop.id));
 
-                if airdrop.completed_at.is_none() {
-                    // Set Airdrop starttime
-                    db::upsert_airdrop(
-                        &ctx.db_pool,
-                        &airdrop.drop_id,
-                        Some(Utc::now().naive_local()),
-                        None,
-                    )
-                    .await?;
-                    println!("Start time added");
+        if airdrop.completed_at.is_some() {
+            warn!(
+                "Airdrop for Drop ID: {} completed at {}. Skipping",
+                airdrop.drop_id,
+                airdrop.completed_at.unwrap()
+            );
+            continue;
+        }
 
-                    // Airdrop
-                    println!("Start minting");
-                    if let Err(e) = mint(ctx, &drop.id.to_string()).await {
-                        println!("Error while minting: {:?}", e);
-                        continue;
-                    }
+        // Set Airdrop starttime
+        log::info!("Starting airdrop for drop: {}", drop.id);
+        airdrop.update(&ctx.db_pool).await?;
 
-                    // Set Airdrop endtime
-                    db::upsert_airdrop(
-                        &ctx.db_pool,
-                        &airdrop.drop_id,
-                        None,
-                        Some(Utc::now().naive_local()),
-                    )
-                    .await?;
-                    println!("End time added");
-                }
+        // Airdrop mint
+        match mint(ctx, &drop).await {
+            Ok(_) => {
+                // Set Airdrop endtime
+                airdrop.completed_at = Some(Utc::now().naive_local());
+                airdrop.update(&ctx.db_pool).await?;
+                info!("Airdrop completed at: {}", airdrop.completed_at.unwrap());
+            }
+            Err(e) => {
+                error!("Error while minting: {:?}", e);
             }
         }
     }
@@ -130,35 +133,56 @@ async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error
     Ok(())
 }
 
-async fn mint(ctx: &Context, drop_id: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let subscriptions = db::find_subscriptions(&ctx.db_pool).await?;
-    println!(
-        "Retrieving subscriptions\n {}",
-        serde_json::to_string_pretty(&subscriptions)?
-    );
+async fn mint(
+    ctx: &Context,
+    drop: &GetDropsProjectDrops,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let subscriptions = Subscription::fetch(&ctx.db_pool).await?;
+    info!("Retrieved {} subscriptions.", subscriptions.len());
 
-    for subscription in subscriptions {
-        let wallet = db::find_wallet_by_user_id(&ctx.db_pool, subscription.user_id).await?;
-        println!("Wallet\n {}", serde_json::to_string_pretty(&wallet)?);
+    for subscription in &subscriptions {
+        match User::find(&ctx.db_pool, &subscription.user_id).await {
+            Ok(Some(user)) => {
+                info!("Found user: {:?}", user);
 
-        if let Some(wallet) = wallet {
-            let mutation = MintEdition::build_query(mint_edition::Variables {
-                input: mint_edition::MintDropInput {
-                    drop: UUID::parse_str(drop_id)?,
-                    recipient: wallet.address.unwrap_or_default(),
-                },
-            });
-            let result = ctx
-                .gql_client
-                .post(ctx.api_endpoint.clone())
-                .json(&mutation)
-                .send()
-                .await?;
+                if let Some(recipient) = user.wallet {
+                    info!("Found wallet for user: {}", recipient);
 
-            let mint_result: graphql_client::Response<mint_edition::ResponseData> =
-                result.json().await?;
+                    if let Some(purchases) = &drop.purchases {
+                        if purchases.iter().any(|p| p.wallet == recipient) {
+                            warn!("User already received airdrop. Skipping");
+                            continue;
+                        }
+                    }
 
-            println!("Mint result: {:?}", mint_result.data);
+                    let mutation = MintEdition::build_query(mint_edition::Variables {
+                        input: mint_edition::MintDropInput {
+                            drop: drop.id,
+                            recipient,
+                        },
+                    });
+                    let result = ctx
+                        .gql_client
+                        .post(ctx.api_endpoint.clone())
+                        .json(&mutation)
+                        .send()
+                        .await?;
+
+                    let mint_result: graphql_client::Response<mint_edition::ResponseData> =
+                        result.json().await?;
+                    info!("Mint result: {:?}", mint_result.data);
+                } else {
+                    error!(
+                        "Found user but wallet address was not found for user_id: {}",
+                        user.user_id
+                    );
+                }
+            }
+            Ok(None) => error!(
+                "Unable to find Holaplex customer id for user_id: {}",
+                subscription.user_id
+            ),
+            Err(e) => error!("Error while finding user: {}", e),
         }
     }
 
