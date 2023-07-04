@@ -1,14 +1,20 @@
-use crate::get_drops::GetDropsProjectDrops;
-use chrono::Utc;
-use db::{Airdrop, Subscription};
 use graphql_client::GraphQLQuery;
-use log::{error, info, warn};
+pub use prelude::*;
 use reqwest::{header, Url};
-use sqlx::PgPool;
+use serde_json::Value;
 use std::env;
-use user::User;
-mod db;
+pub use {
+    airdrop::Airdrop,
+    get_drops::GetDropsProjectDrops,
+    subscription::Subscription,
+    user::{User, UserFindError},
+    wallet::Wallet,
+};
+mod airdrop;
+mod prelude;
+mod subscription;
 mod user;
+mod wallet;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -26,6 +32,17 @@ struct GetDrops;
 )]
 struct MintEdition;
 
+#[derive(Debug, Deserialize)]
+struct GraphQLError {
+    message: String,
+    path: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct GraphQLResponse<T> {
+    data: Option<T>,
+    errors: Option<Vec<GraphQLError>>,
+}
 #[allow(clippy::upper_case_acronyms)]
 pub type UUID = uuid::Uuid;
 
@@ -67,10 +84,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::vars();
     let context = Context::new().await?;
     let project_id = UUID::parse_str(&env::var("HOLAPLEX_PROJECT_ID")?)?;
-    start(&context, project_id).await
+    run(&context, project_id).await
 }
 
-async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error::Error>> {
+async fn run(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error::Error>> {
     info!("Starting Airdrop");
     let query = GetDrops::build_query(get_drops::Variables {
         project: project_id,
@@ -95,7 +112,7 @@ async fn start(ctx: &Context, project_id: UUID) -> Result<(), Box<dyn std::error
 
     for drop in drops {
         if !(drop.start_time.is_none() || drop.start_time.unwrap() <= Utc::now()) {
-            warn!("Drop start_time not reached. skipping");
+            info!("Drop start_time not reached. Skipping");
             continue;
         };
 
@@ -142,47 +159,75 @@ async fn mint(
 
     for subscription in &subscriptions {
         match User::find(&ctx.db_pool, &subscription.user_id).await {
-            Ok(Some(user)) => {
-                info!("Found user: {:?}", user);
+            Ok(user) => {
+                if drop
+                    .purchases
+                    .as_ref()
+                    .map(|p| p.iter().any(|p| p.wallet == user.wallet))
+                    .unwrap_or(false)
+                {
+                    info!("Wallet {} already received airdrop. Skipping", user.wallet);
+                    continue;
+                }
 
-                if let Some(recipient) = user.wallet {
-                    info!("Found wallet for user: {}", recipient);
+                let mutation = MintEdition::build_query(mint_edition::Variables {
+                    input: mint_edition::MintDropInput {
+                        drop: drop.id,
+                        recipient: user.wallet,
+                    },
+                });
 
-                    if let Some(purchases) = &drop.purchases {
-                        if purchases.iter().any(|p| p.wallet == recipient) {
-                            warn!("User already received airdrop. Skipping");
-                            continue;
+                match ctx
+                    .gql_client
+                    .post(ctx.api_endpoint.clone())
+                    .json(&mutation)
+                    .send()
+                    .await
+                {
+                    Ok(response) => {
+                        let res: GraphQLResponse<Value> = response.json().await?;
+                        if let Some(errors) = res.errors {
+                            for error in errors {
+                                error!("Error: {}\nPath: {:?}", error.message, error.path);
+                            }
+                            return Err(Box::new(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                "GraphQL error.",
+                            )));
+                        } else {
+                            info!("Success: {}", res.data.unwrap().to_string())
                         }
                     }
-
-                    let mutation = MintEdition::build_query(mint_edition::Variables {
-                        input: mint_edition::MintDropInput {
-                            drop: drop.id,
-                            recipient,
-                        },
-                    });
-                    let result = ctx
-                        .gql_client
-                        .post(ctx.api_endpoint.clone())
-                        .json(&mutation)
-                        .send()
-                        .await?;
-
-                    let mint_result: graphql_client::Response<mint_edition::ResponseData> =
-                        result.json().await?;
-                    info!("Mint result: {:?}", mint_result.data);
-                } else {
-                    error!(
-                        "Found user but wallet address was not found for user_id: {}",
-                        user.user_id
-                    );
+                    Err(e) => {
+                        error!("Failed to send request to GraphQL client: {}", e);
+                        return Err(Box::new(e));
+                    }
                 }
             }
-            Ok(None) => error!(
-                "Unable to find Holaplex customer id for user_id: {}",
-                subscription.user_id
-            ),
-            Err(e) => error!("Error while finding user: {}", e),
+            Err(e) => match e {
+                UserFindError::DbError(e) => {
+                    error!("Database error: {}", e);
+                    return Err(e);
+                }
+                UserFindError::UserNotFound => {
+                    warn!("User {} not found. Skipping", subscription.user_id);
+                    continue;
+                }
+                UserFindError::CustomerIdNotFound => {
+                    warn!(
+                        "Customer id not found for user_id: {}. Skipping",
+                        subscription.user_id
+                    );
+                    continue;
+                }
+                UserFindError::WalletNotFound => {
+                    warn!(
+                        "Wallet not found for user_id: {}. Skipping",
+                        subscription.user_id
+                    );
+                    continue;
+                }
+            },
         }
     }
 

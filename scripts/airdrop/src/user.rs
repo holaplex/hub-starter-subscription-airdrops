@@ -1,11 +1,11 @@
-use crate::db::{self, Wallet};
-use uuid::Uuid;
+use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, FromRow, Serialize)]
 pub struct User {
-    pub user_id: String,
-    pub customer_id: Uuid,
-    pub wallet: Option<String>,
+    pub id: String,
+    #[sqlx(rename = "holaplexCustomerId")]
+    pub cust_id: Uuid,
+    pub wallet: String,
 }
 
 #[derive(Debug)]
@@ -30,25 +30,30 @@ impl std::fmt::Display for UserFindError {
 impl std::error::Error for UserFindError {}
 
 impl User {
-    pub async fn find(db: &crate::PgPool, user_id: &str) -> Result<Option<Self>, UserFindError> {
-        let user = db::User::find_by_customer_id(db, user_id)
-            .await
-            .map_err(|e| UserFindError::DbError(Box::new(e)))?
-            .ok_or(UserFindError::UserNotFound)?;
+    pub async fn find(db: &crate::PgPool, id: &str) -> Result<Self, UserFindError> {
+        let record: Result<Option<(Option<String>, Option<Uuid>, Option<String>)>, _> =
+            sqlx::query_as(
+                r#"
+            SELECT "User"."id", "User"."holaplexCustomerId", "Wallet"."address"
+            FROM "User"
+            INNER JOIN "Wallet" ON "User"."holaplexCustomerId" = "Wallet"."holaplexCustomerId"
+            WHERE "User"."id" = $1
+            "#,
+            )
+            .bind(id)
+            .fetch_optional(db)
+            .await;
 
-        let customer_id = user
-            .holaplex_customer_id
-            .ok_or(UserFindError::CustomerIdNotFound)?;
-
-        let wallet = Wallet::find_by_customer_id(db, customer_id)
-            .await
-            .map_err(|e| UserFindError::DbError(Box::new(e)))?
-            .ok_or(UserFindError::WalletNotFound)?;
-
-        Ok(Some(User {
-            user_id: user_id.to_string(),
-            customer_id: user.holaplex_customer_id.unwrap(),
-            wallet: wallet.address,
-        }))
+        match record {
+            Ok(Some((Some(id), Some(cust_id), Some(wallet)))) => Ok(User {
+                id,
+                cust_id,
+                wallet,
+            }),
+            Ok(Some((Some(_), Some(_), None))) => Err(UserFindError::WalletNotFound),
+            Ok(Some((Some(_), None, _))) => Err(UserFindError::CustomerIdNotFound),
+            Ok(Some((None, _, _))) | Ok(None) => Err(UserFindError::UserNotFound),
+            Err(e) => Err(UserFindError::DbError(Box::new(e))),
+        }
     }
 }
