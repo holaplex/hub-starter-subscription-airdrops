@@ -1,0 +1,11 @@
+/Users/pwarrior/Downloads/Codes/holaplex/hub-starters/hub-starter-subscription-airdrops/scripts/airdrop/target/debug/deps/ascii-8fc3f77adfef561f.rmeta: /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/lib.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_char.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_str.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_string.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/free_functions.rs
+
+/Users/pwarrior/Downloads/Codes/holaplex/hub-starters/hub-starter-subscription-airdrops/scripts/airdrop/target/debug/deps/libascii-8fc3f77adfef561f.rlib: /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/lib.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_char.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_str.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_string.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/free_functions.rs
+
+/Users/pwarrior/Downloads/Codes/holaplex/hub-starters/hub-starter-subscription-airdrops/scripts/airdrop/target/debug/deps/ascii-8fc3f77adfef561f.d: /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/lib.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_char.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_str.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_string.rs /Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/free_functions.rs
+
+/Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/lib.rs:
+/Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_char.rs:
+/Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_str.rs:
+/Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/ascii_string.rs:
+/Users/pwarrior/.cargo/registry/src/github.com-1ecc6299db9ec823/ascii-0.9.3/src/free_functions.rs:
