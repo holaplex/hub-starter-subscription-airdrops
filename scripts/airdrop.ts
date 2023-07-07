@@ -76,7 +76,7 @@ export const start = async () => {
       project: process.env.HOLAPLEX_PROJECT_ID as string
     }
   });
-
+  console.log('result', result);
   result.data.project.drops?.map(async (drop: Drop) => {
     console.log(drop);
     const airdrop = await db.airdrop.findFirst({
