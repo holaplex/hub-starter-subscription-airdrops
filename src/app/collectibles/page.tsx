@@ -1,7 +1,7 @@
 'use client';
 import { GetCollectibles } from '@/queries/collectibles.graphql';
 import { useQuery } from '@apollo/client';
-import { CollectionMint } from '../../../graphql.types';
+import { CollectionMint } from '../../graphql.types';
 
 interface GetCollectiblesData {
   collectibles: [CollectionMint];

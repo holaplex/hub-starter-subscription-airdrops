@@ -7,6 +7,7 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import UserSource from '@/modules/user';
 import holaplex from '@/modules/holaplex';
 import db from '@/modules/db';
+import Home from './Home';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,7 +30,9 @@ export default async function Layout({
           'bg-backdrop text-white container m-auto flex flex-col flex-grow min-h-screen max-w-5xl items-center px-4 lg:px-0'
         )}
       >
-        <App me={me}>{children}</App>
+        <App me={me}>
+          <Home>{children}</Home>
+        </App>
       </body>
     </html>
   );

@@ -37,7 +37,7 @@
     "http-proxy": "^1.18.1",
     "install": "^0.13.0",
     "micro": "^10.0.1",
-    "next": "^13.3.1",
+    "next": "^13.4.8",
     "next-auth": "^4.19.2",
     "next-plugin-graphql": "^0.0.2",
     "npm": "^9.6.1",
@@ -45,9 +45,9 @@
     "ramda": "^0.28.0",
     "react": "^18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "^4.9.5",
+    "react-spinners": "^0.13.8",
     "ts-node": "^10.9.1",
-    "react-spinners": "^0.13.8"
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.16.4",
