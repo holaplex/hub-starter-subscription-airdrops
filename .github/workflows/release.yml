@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: airdrop-${{ matrix.os }}-amd64
-          path: target/${{ matrix.target }}/release/airdrop
+          path: ./scripts/airdrop/target/${{ matrix.target }}/release/airdrop
           if-no-files-found: error
 
   release:
