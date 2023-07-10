@@ -16,31 +16,33 @@ services:
     envVars:
       - fromGroup: airdrop-env
     autoDeploy: true
-    envVarGroups:
-      - name: airdrop-env
-        envVars:
-        - key: GOOGLE_CLIENT_ID
-          sync: false
-        - key: GOOGLE_CLIENT_SECRET
-          sync: false
-        - key: HOLAPLEX_AUTH_TOKEN
-          sync: false
-        - key: HOLAPLEX_PROJECT_ID
-          sync: false
-        - key: HOLAPLEX_DROP_ID
-          sync: false
-        - key: NEXTAUTH_URL
-          sync: false
-        - key: NEXTAUTH_SECRET
-          generateValue: true
-        - key: HOLAPLEX_WALLET_ASSET_TYPE
-          value: SOL
-        - key: HOLAPLEX_API_ENDPOINT
-          value: https://api.holaplex.com/graphql
-        - key: DATABASE_URL
-          fromDatabase:
-            name: hub-starter-template
-            property: connectionString
+
 databases:
   - name: hub-starter-template
     ipAllowList: []
+
+envVarGroups:
+  - name: airdrop-env
+    envVars:
+    - key: GOOGLE_CLIENT_ID
+      sync: false
+    - key: GOOGLE_CLIENT_SECRET
+      sync: false
+    - key: HOLAPLEX_AUTH_TOKEN
+      sync: false
+    - key: HOLAPLEX_PROJECT_ID
+      sync: false
+    - key: HOLAPLEX_DROP_ID
+      sync: false
+    - key: NEXTAUTH_URL
+      sync: false
+    - key: NEXTAUTH_SECRET
+      generateValue: true
+    - key: HOLAPLEX_WALLET_ASSET_TYPE
+      value: SOL
+    - key: HOLAPLEX_API_ENDPOINT
+      value: https://api.holaplex.com/graphql
+    - key: DATABASE_URL
+      fromDatabase:
+        name: hub-starter-template
+        property: connectionString
