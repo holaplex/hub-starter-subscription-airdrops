@@ -2,6 +2,15 @@
 const withGraphql = require("next-plugin-graphql");
 
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/drips",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

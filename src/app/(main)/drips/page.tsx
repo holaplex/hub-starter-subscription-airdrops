@@ -1,7 +1,7 @@
 'use client';
 import { GetPastDrips } from '@/queries/airdrops.graphql';
 import { useQuery } from '@apollo/client';
-import { Airdrop } from '../../graphql.types';
+import { Airdrop } from '@/graphql.types';
 
 interface GetPastDripsData {
   pastDrips: [Airdrop];
