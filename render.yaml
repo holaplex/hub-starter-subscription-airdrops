@@ -6,16 +6,7 @@ services:
     schedule: "*/3 * * * *"
     startCommand: "wget https://github.com/holaplex/hub-starter-subscription-airdrops/releases/download/1.0/airdrop-linux-amd64 -O airdrop && chmod +x ./airdrop && RUST_LOG=debug ./airdrop"
     envVars:
-    - key: HOLAPLEX_PROJECT_ID
-      sync: false
-    - key: HOLAPLEX_AUTH_TOKEN
-      sync: false
-    - key: HOLAPLEX_API_ENDPOINT
-      value: https://api.holaplex.com/graphql
-    - key: DATABASE_URL
-      fromDatabase:
-        name: hub-starter-template
-        property: connectionString
+    - fromGroup: conc-settings
   - type: web
     name: hub-starter-template
     env: node
@@ -23,31 +14,33 @@ services:
     buildCommand: npm install; npm run build
     startCommand: npm run start
     envVars:
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: HOLAPLEX_AUTH_TOKEN
-        sync: false
-      - key: HOLAPLEX_PROJECT_ID
-        sync: false
-      - key: HOLAPLEX_DROP_ID
-        sync: false
-      - key: NEXTAUTH_URL
-        sync: false
-      - key: NEXTAUTH_SECRET
-        generateValue: true
-      - key: HOLAPLEX_WALLET_ASSET_TYPE
-        value: SOL
-      - key: HOLAPLEX_API_ENDPOINT
-        value: https://api.holaplex.com/graphql
-      - key: DATABASE_URL
-        fromDatabase:
-          name: hub-starter-template
-          property: connectionString
-
+      - fromGroup: conc-settings
     autoDeploy: true
-
+    envVarGroups:
+      - name: conc-settings
+        envVars:
+        - key: GOOGLE_CLIENT_ID
+          sync: false
+        - key: GOOGLE_CLIENT_SECRET
+          sync: false
+        - key: HOLAPLEX_AUTH_TOKEN
+          sync: false
+        - key: HOLAPLEX_PROJECT_ID
+          sync: false
+        - key: HOLAPLEX_DROP_ID
+          sync: false
+        - key: NEXTAUTH_URL
+          sync: false
+        - key: NEXTAUTH_SECRET
+          generateValue: true
+        - key: HOLAPLEX_WALLET_ASSET_TYPE
+          value: SOL
+        - key: HOLAPLEX_API_ENDPOINT
+          value: https://api.holaplex.com/graphql
+        - key: DATABASE_URL
+          fromDatabase:
+            name: hub-starter-template
+            property: connectionString
 databases:
   - name: hub-starter-template
     ipAllowList: []
