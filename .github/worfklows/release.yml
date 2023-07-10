@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - release
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+        - x86_64-unknown-linux-musl
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    services:
+      postgres:
+        image: postgres:14.1
+
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: ci
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cp holaplex.graphql ./scripts/airdrop && cd scripts/airdrop
+          docker run --network host --rm -t \
+            -e DATABASE_URL=postgres://ci:ci@127.0.0.1:5432/ci
+            -v $HOME/.cargo/registry/:/root/.cargo/registry \
+            -v "$(pwd)":/volume \
+            clux/muslrust:stable \
+            cargo build --release --target ${{ matrix.target }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: airdrop-${{ matrix.os }}-amd64
+          path: target/${{ matrix.target }}/release/airdrop
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download
+        uses: actions/download-artifact@v2
+      - name: Layout
+        run: |
+          mv airdrop-ubuntu-latest-amd64/airdrop ./airdrop-linux-amd64
+          rm -rf airdrop-ubuntu-latest-amd64
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+        with:
+          generate_release_notes: true
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            airdrop-linux-amd64

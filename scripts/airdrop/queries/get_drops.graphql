@@ -1,0 +1,34 @@
+query GetDrops($project: UUID!) {
+  project(id: $project) {
+    id
+    drops {
+      id
+      startTime
+      endTime
+      purchases {
+        mintId
+		    wallet
+      }
+      collection {
+        totalMints
+        supply
+        id
+        address
+        holders {
+          address
+          owns
+        }
+        metadataJson {
+          id
+          image
+          name
+          description
+          attributes {
+            traitType
+            value
+          }
+        }
+      }
+    }
+  }
+}
