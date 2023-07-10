@@ -19,24 +19,34 @@ jobs:
             os: ubuntu-latest
     runs-on: ${{ matrix.os }}
 
-    services:
-      postgres:
-        image: postgres:14.1
-
-        env:
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: ci
-          POSTGRES_PORT: 5432
-          POSTGRES_DB: ci
-
     steps:
       - uses: actions/checkout@v2
+      - name: Prepare env
+        run: |
+          cat << EOF > .env
+          DATABASE_URL=postgres://postgres:holaplex@localhost:5432/hub-starter
+          POSTGRES_DB=hub-starter
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=holaplex
+          EOF
+
+      - uses: isbang/compose-action@v1.4.1
+        name: Start Postgres with docker-compose
+        with:
+          compose-file: ./docker-compose.yaml
+
+      - name: Install packages and run migrations
+        run: |
+          npm install
+          npm run migrate
+
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
+          export $(xargs < .env)
           cp holaplex.graphql ./scripts/airdrop && cd scripts/airdrop
-          docker run --rm -t \
-            -e DATABASE_URL=postgres://ci:ci@postgres:5432/ci \
+          docker run --network host --rm -t \
+            -e DATABASE_URL=$DATABASE_URL \
             -v $HOME/.cargo/registry/:/root/.cargo/registry \
             -v "$(pwd)":/volume \
             clux/muslrust:stable \
