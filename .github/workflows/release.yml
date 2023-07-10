@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - release
+      - mpw/ci_setup
 
 jobs:
   build:
@@ -35,7 +36,7 @@ jobs:
         run: |
           cp holaplex.graphql ./scripts/airdrop && cd scripts/airdrop
           docker run --network host --rm -t \
-            -e DATABASE_URL=postgres://ci:ci@127.0.0.1:5432/ci
+            -e DATABASE_URL=postgres://ci:ci@127.0.0.1:5432/ci \
             -v $HOME/.cargo/registry/:/root/.cargo/registry \
             -v "$(pwd)":/volume \
             clux/muslrust:stable \
