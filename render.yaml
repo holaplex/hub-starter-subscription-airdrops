@@ -4,7 +4,7 @@ services:
     env: node
     numInstances: 1
     schedule: "*/3 * * * *"
-    startCommand: "curl -sSLo airdrop  https://github.com/holaplex/hub-starter-subscription-airdrops/releases/download/1.0/airdrop-linux-amd64 && chmod +x ./airdrop && RUST_LOG=info ./airdrop"
+    startCommand: "curl -sSLo airdrop https://github.com/holaplex/hub-starter-subscription-airdrops/releases/download/1.0/airdrop-linux-amd64 && chmod +x ./airdrop && RUST_LOG=info ./airdrop"
     envVars:
       - fromGroup: airdrop-env
       - key: DATABASE_URL
