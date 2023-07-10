@@ -6,7 +6,7 @@ services:
     schedule: "*/3 * * * *"
     startCommand: "wget https://github.com/holaplex/hub-starter-subscription-airdrops/releases/download/1.0/airdrop-linux-amd64 -O airdrop && chmod +x ./airdrop && RUST_LOG=debug ./airdrop"
     envVars:
-    - fromGroup: conc-settings
+      - fromGroup: airdrop-env
   - type: web
     name: hub-starter-template
     env: node
@@ -14,10 +14,10 @@ services:
     buildCommand: npm install; npm run build
     startCommand: npm run start
     envVars:
-      - fromGroup: conc-settings
+      - fromGroup: airdrop-env
     autoDeploy: true
     envVarGroups:
-      - name: conc-settings
+      - name: airdrop-env
         envVars:
         - key: GOOGLE_CLIENT_ID
           sync: false
