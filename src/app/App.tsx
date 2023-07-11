@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { ApolloProvider } from "@apollo/client";
-import api from "@/modules/api";
-import MeProvider from "@/providers/MeProvider";
-import { User } from "@/graphql.types";
+import { ApolloProvider } from '@apollo/client';
+import api from '@/modules/api';
+import MeProvider from '@/providers/MeProvider';
+import { User } from '@/graphql.types';
 
 export default function App({
   children,
-  me,
+  me
 }: {
   children: React.ReactNode;
   me: User | undefined;

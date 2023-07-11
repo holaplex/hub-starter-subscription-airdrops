@@ -7,7 +7,7 @@ interface GetPastDripsData {
   pastDrips: [Airdrop];
 }
 
-export default async function DripsPage() {
+export default function DripsPage() {
   const pastDripsQuery = useQuery<GetPastDripsData>(GetPastDrips);
 
   return (
