@@ -27,11 +27,11 @@ type Airdrop {
 
 type Query {
   me: User
-  drop: Drop
+  airdrop: Drop
   drops: [Drop]
   collectibles: [CollectionMint]
   subscription: Subscription
-  pastDrips: [Airdrop]
+  pastAirdrops: [Airdrop]
 }
 
 type Mutation {

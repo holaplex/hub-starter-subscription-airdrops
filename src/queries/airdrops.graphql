@@ -1,5 +1,5 @@
-query GetPastDrips {
-  pastDrips {
+query GetPastAirdrops {
+  pastAirdrops {
     drop {
       id
       startTime
@@ -23,5 +23,29 @@ query GetPastDrips {
     }
     startedAt
     completedAt
+  }
+}
+
+query GetAirdrop {
+  airdrop {
+    id
+    startTime
+    endTime
+    collection {
+      id
+      totalMints
+      supply
+      address
+      holders {
+        address
+        owns
+      }
+      metadataJson {
+        id
+        image
+        name
+        description
+      }
+    }
   }
 }

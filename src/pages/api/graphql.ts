@@ -67,7 +67,7 @@ interface GetCustomerCollectiblesVars {
 }
 
 export const queryResolvers: QueryResolvers<AppContext> = {
-  async drop(_a, _b, { dataSources: { holaplex } }) {
+  async airdrop(_a, _b, { dataSources: { holaplex } }) {
     const { data } = await holaplex.query<GetDropData, GetDropVars>({
       fetchPolicy: 'network-only',
       query: GetProjectDrop,
@@ -137,7 +137,7 @@ export const queryResolvers: QueryResolvers<AppContext> = {
       subscribedAt: subscription?.subscribedAt
     } as Subscription;
   },
-  async pastDrips(_a, _b, { session, dataSources: { db } }) {
+  async pastAirdrops(_a, _b, { session, dataSources: { db } }) {
     const airdrops = await db.airdrop.findMany({
       where: {
         completedAt: {

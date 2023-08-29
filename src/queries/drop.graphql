@@ -1,27 +1,3 @@
-query GetDrop {
-  drop {
-    id
-    startTime
-    endTime
-    collection {
-      id
-      totalMints
-      supply
-      address
-      holders {
-        address
-        owns
-      }
-      metadataJson {
-        id
-        image
-        name
-        description
-      }
-    }
-  }
-}
-
 query GetDrops {
   drops {
     id

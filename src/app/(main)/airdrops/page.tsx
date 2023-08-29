@@ -1,19 +1,19 @@
 'use client';
-import { GetPastDrips } from '@/queries/airdrops.graphql';
+import { GetPastAirdrops } from '@/queries/airdrops.graphql';
 import { useQuery } from '@apollo/client';
 import { Airdrop } from '@/graphql.types';
 
-interface GetPastDripsData {
-  pastDrips: [Airdrop];
+interface GetPastAirdropsData {
+  pastAirdrops: [Airdrop];
 }
 
-export default function DripsPage() {
-  const pastDripsQuery = useQuery<GetPastDripsData>(GetPastDrips);
+export default function AirdropsPage() {
+  const pastAirdropsQuery = useQuery<GetPastAirdropsData>(GetPastAirdrops);
 
   return (
     <div>
       <div className='flex flex-wrap gap-6 justify-center mt-4 mb-10'>
-        {pastDripsQuery.loading ? (
+        {pastAirdropsQuery.loading ? (
           <>
             {Array.from(Array(8)).map((_, index) => (
               <div key={index}>
@@ -23,7 +23,7 @@ export default function DripsPage() {
           </>
         ) : (
           <>
-            {pastDripsQuery.data?.pastDrips?.map((airdrop: Airdrop) => {
+            {pastAirdropsQuery.data?.pastAirdrops?.map((airdrop: Airdrop) => {
               return (
                 <div key={airdrop.drop?.id}>
                   <img
