@@ -5,7 +5,7 @@ dotenv.config();
 
 const config: CodegenConfig = {
   overwrite: true,
-  documents: ["**/*.graphql"],
+  documents: ["./src/**/*.graphql"],
   schema: [
     {
       [process.env.HOLAPLEX_API_ENDPOINT as string]: {

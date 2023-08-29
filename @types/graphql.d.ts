@@ -16,7 +16,6 @@ declare module '*/drop.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;
   export const MintNft: DocumentNode;
-export const GetDrop: DocumentNode;
 export const GetDrops: DocumentNode;
 
   export default defaultDocument;
@@ -46,7 +45,8 @@ export const GetSubscription: DocumentNode;
 declare module '*/airdrops.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;
-  export const GetPastDrips: DocumentNode;
+  export const GetPastAirdrops: DocumentNode;
+export const GetAirdrop: DocumentNode;
 
   export default defaultDocument;
 }

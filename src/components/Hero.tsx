@@ -106,7 +106,7 @@ export default function Hero() {
       </div>
       <div className='w-full flex flex-col items-center'>
         <div className='flex flex-col items-center mt-20'>
-          <span className='font-semibold text-5xl'>Holaplex subscription drops</span>
+          <span className='font-semibold text-5xl'>Holaplex subscription airdrops</span>
           {subscriptionQuery.loading ? (
             <>
               <div className='w-60 h-6 rounded-full bg-gray-600 animate-pulse mt-3' />

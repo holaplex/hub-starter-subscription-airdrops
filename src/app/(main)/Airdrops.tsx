@@ -12,9 +12,9 @@ export default function Home({ children }: { children: React.ReactNode }) {
       <Tabs.Page className="mt-8">
         <Tabs.Panel>
           <Tabs.Tab
-            name="Past drops"
-            href="/drips"
-            active={pathname === "/drips"}
+            name="Past airdrops"
+            href="/airdrops"
+            active={pathname === "/airdrops"}
           />
           <Tabs.Tab
             name="Your collectibles"
